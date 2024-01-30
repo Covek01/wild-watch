@@ -22,7 +22,7 @@ namespace WildWatchAPI.Models
         public UserSummary Sighter { get; set; } = null!;
     }
 
-    public class SightingSummayHabitat
+    public class SightingSummaryHabitat
     {
         public MongoDBRef Id { get; set; } = null!;
         public DateTime SightingTime { get; set; }

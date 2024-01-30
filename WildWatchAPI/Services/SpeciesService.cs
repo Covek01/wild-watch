@@ -46,8 +46,8 @@ namespace WildWatchAPI.Services
 
                
 
-                var habitatsToUpdate = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings,Builders<SightingSummayHabitat>.Filter.Where(s => s.Species.Id == new MongoDBRef("Species", speciesId)));
-                var habitatsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummayHabitat>.Filter.Where(s=>s.Species.Id==new MongoDBRef("Species", speciesId)));
+                var habitatsToUpdate = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings,Builders<SightingSummaryHabitat>.Filter.Where(s => s.Species.Id == new MongoDBRef("Species", speciesId)));
+                var habitatsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s=>s.Species.Id==new MongoDBRef("Species", speciesId)));
 
                 var userFilterFavourite = Builders<User>.Filter.ElemMatch(u => u.FavouriteSpecies, Builders<MongoDBRef>.Filter.Where(s => s.Id == speciesId));
                 var userUpdateFavourite = Builders<User>.Update.PullFilter(u => u.FavouriteSpecies, Builders<MongoDBRef>.Filter.Where(s => s.Id == speciesId));
@@ -89,13 +89,23 @@ namespace WildWatchAPI.Services
         public async Task<Species> GetAsync(string speciesId)
         {
             var speciesFilter = Builders<Species>.Filter.Where(sp => sp.Id == speciesId);
-            return await _context.Species.Find(speciesFilter).FirstOrDefaultAsync();
+            var species= await _context.Species.Find(speciesFilter).FirstOrDefaultAsync();
+            if (species == default)
+            {
+                throw new Exception("Invalid Id");
+            }
+            return species;
         }
 
         public async Task<Species> GetByCommonName(string commonName)
         {
             var speciesFilter = Builders<Species>.Filter.Where(sp => sp.CommonName.ToLower()== commonName.ToLower());
-            return await _context.Species.Find(speciesFilter).FirstOrDefaultAsync();
+            var species=await _context.Species.Find(speciesFilter).FirstOrDefaultAsync();
+            if(species == default) 
+            {
+                throw new Exception("Invalid Id");
+            }
+            return species;
         }
 
     }

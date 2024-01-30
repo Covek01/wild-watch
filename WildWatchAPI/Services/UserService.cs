@@ -207,8 +207,8 @@ namespace WildWatchAPI.Services
                 var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", userId)));
                 var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", userId)));
 
-                var habitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummayHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId)));
-                var habitatsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummayHabitat>.Filter.Where(s => s.Species.Id == new MongoDBRef("Users", userId)));
+                var habitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId)));
+                var habitatsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Species.Id == new MongoDBRef("Users", userId)));
 
 
                 await _context.Users.DeleteOneAsync(user);
@@ -225,7 +225,12 @@ namespace WildWatchAPI.Services
 
         public async Task<User> GetAsync(string userId)
         {
-            return await _context.Users.Find(u=>u.Id==userId).FirstOrDefaultAsync();
+            var user =await _context.Users.Find(u=>u.Id==userId).FirstOrDefaultAsync();
+            if (user == default)
+            {
+                throw new Exception("Invalid Id");
+            }
+            return user;
         }
 
         public async Task<User> UpdateAsync(string userId, UserUpdateDto user)

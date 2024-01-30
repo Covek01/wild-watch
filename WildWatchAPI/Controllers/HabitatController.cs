@@ -4,24 +4,25 @@ using WildWatchAPI.Services;
 
 namespace WildWatchAPI.Controllers
 {
-    [Route("sighting")]
+    [Route("habitat")]
     [ApiController]
-    public class SightingController : ControllerBase
+    public class HabitatController : ControllerBase
     {
-        private readonly ISightingService _sightingService;
+        private readonly IHabitatService _habitatService;
 
-        public SightingController(
-            ISightingService sightingService)
+        public HabitatController(
+            IHabitatService habitatService)
         {
-            _sightingService = sightingService;
+            _habitatService = habitatService;
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult> CreateSighting([FromBody] SightingDto s)
+        public async Task<ActionResult> CreateHabitat([FromBody] HabitatDto h) 
         {
             try
             {
-                return Ok(await _sightingService.CreateAsync(s));
+                var result=await _habitatService.CreateAsync(h);
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -30,11 +31,11 @@ namespace WildWatchAPI.Controllers
         }
 
         [HttpGet("read/{id}")]
-        public async Task<ActionResult> GetSighting([FromRoute] string id)
+        public async Task<ActionResult> GetHabitat([FromRoute] string id)
         {
             try
             {
-                return Ok(await _sightingService.GetAsync(id));
+                return Ok(await _habitatService.GetAsync(id));
             }
             catch (Exception ex)
             {
@@ -43,24 +44,24 @@ namespace WildWatchAPI.Controllers
         }
 
         [HttpPut("update")]
-        public async Task<ActionResult> UpdateSighting([FromBody]SightingDto s, [FromQuery] string sightingId )
+        public async Task<ActionResult> UpdateHabitat([FromBody] HabitatDto h, [FromQuery] string habitatId)
         {
             try
             {
-                return Ok(await _sightingService.UpdateAsync(sightingId, s));
+                return Ok(await _habitatService.UpdateAsync(habitatId, h));
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
                 return BadRequest(ex.Message);
             }
         }
 
         [HttpDelete("delete")]
-        public async Task<ActionResult> DeleteSighting([FromQuery] string sighingId)
+        public async Task<ActionResult> DeleteHabitat([FromQuery] string habitatId)
         {
             try
             {
-                await _sightingService.DeleteAsync(sighingId);
+                await _habitatService.DeleteAsync(habitatId);
                 return Ok("deleted");
             }
             catch (Exception ex)

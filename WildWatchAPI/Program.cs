@@ -43,6 +43,7 @@ builder.Services.AddSingleton<IDbContext, DbContext>();
 builder.Services.AddSingleton<ISpeciesService, SpeciesService>();
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<ISightingService, SightingService>();
+builder.Services.AddSingleton<IHabitatService, HabitatService>();
 builder.Services.AddHttpContextAccessor();
 
 

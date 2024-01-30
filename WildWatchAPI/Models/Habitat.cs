@@ -17,6 +17,6 @@ namespace WildWatchAPI.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
         public List<GeoJsonPoint<GeoJson2DGeographicCoordinates>> BorderPoints { get; set; } = new();
-        public List<SightingSummayHabitat> Sightings { get; set; } = new();
+        public List<SightingSummaryHabitat> Sightings { get; set; } = new();
     }
 }
