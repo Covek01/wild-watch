@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver.GeoJsonObjectModel;
 using WildWatchAPI.DTOs;
 using WildWatchAPI.Services;
 
@@ -99,12 +100,12 @@ namespace WildWatchAPI.Controllers
             }
         }
 
-        [HttpGet("read/{id}")]
-        public async Task<ActionResult> GetUser([FromRoute] string userId)
+        [HttpGet("read/{Id}")]
+        public async Task<ActionResult> GetUser([FromRoute] string Id)
         {
             try
             {
-                return Ok(await _userService.GetAsync(userId));
+                return Ok(await _userService.GetAsync(Id));
             }
             catch (Exception ex)
             {
@@ -119,6 +120,63 @@ namespace WildWatchAPI.Controllers
             try
             {
                 return Ok(await _userService.UpdateAsync(userId, user));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("getMyLocation")]
+        public async Task<ActionResult> GetMyLocation()
+        {
+            try
+            {
+                return Ok(await _userService.GetMyLocation());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("setMyLocation")]
+        public async Task<ActionResult> SetMyLocation([FromBody] GeoJson2DGeographicCoordinates location)
+        {
+            try
+            {
+                await _userService.SetMyLocation(location);
+                return Ok("location set");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("addFavouriteSpecies/{id}")]
+        public async Task<ActionResult> AddFavouriteSpecies([FromRoute] string id)
+        {
+            try
+            {
+                return Ok(await _userService.AddMyFavouriteSpecies(id));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("removeFavouriteSpecies/{id}")]
+        public async Task<ActionResult> RemoveFavouriteSpecies([FromRoute] string id)
+        {
+            try
+            {
+                return Ok(await _userService.RemoveMyFavouriteSpecies(id));
             }
             catch (Exception ex)
             {

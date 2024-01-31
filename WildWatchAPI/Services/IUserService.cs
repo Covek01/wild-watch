@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver.GeoJsonObjectModel;
 using WildWatchAPI.DTOs;
 using WildWatchAPI.Models;
 
@@ -16,5 +17,11 @@ namespace WildWatchAPI.Services
         public Task<User> GetAsync(string userId);
 
         public Task<User> UpdateAsync(string userId, UserUpdateDto user);
+
+        public Task<User> AddMyFavouriteSpecies(string speciesId);
+        public Task<User> RemoveMyFavouriteSpecies(string speciesId);
+        public Task SetMyLocation(GeoJson2DGeographicCoordinates? location);
+        public Task<GeoJson2DGeographicCoordinates?> GetMyLocation();
+
     }
 }

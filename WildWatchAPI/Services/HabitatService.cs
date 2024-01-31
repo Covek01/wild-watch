@@ -1,4 +1,5 @@
 ﻿using Amazon.Runtime.Internal.Util;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
 using System.Drawing;
@@ -57,10 +58,13 @@ namespace WildWatchAPI.Services
 
                     //var nearHabitats = await _context.Habitats.Find(h => h.BorderPoints.Any(p => CloserThanMeters(p, habitat.BorderPoints))).ToListAsync();
                     //var nearHabitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.BorderPoints, Builders<GeoJsonPoint<GeoJson2DGeographicCoordinates>>.Filter.Where(p => CloserThanMeters(p, habitat.BorderPoints)));
-                    var nearHabitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.BorderPoints, Builders<GeoJsonPoint<GeoJson2DGeographicCoordinates>>.Filter.Where(p => p.Coordinates.Longitude==45));
+                    var nearHabitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.BorderPoints, Builders<GeoJsonPoint<GeoJson2DGeographicCoordinates>>.Filter.Where(p => p.Coordinates.Longitude == 45));
 
-                    var nearHabitats =await _context.Habitats.Find(nearHabitatsFilter).ToListAsync();
-                    
+                    var nearHabitats = await _context.Habitats.Find(nearHabitatsFilter).ToListAsync();
+
+
+
+
 
                     numOfConsolidation = nearHabitats.Count;
 
@@ -104,7 +108,7 @@ namespace WildWatchAPI.Services
                 HabitatSummary habitatSummary = new HabitatSummary()
                 {
                     BorderPoints = h.BorderPoints,
-                    Id = new MongoDBRef("Habitats", habitat.Id)
+                    Id = new MongoDBRef("Habitats", new ObjectId(habitat.Id))
                 };
 
                 var speciesToUpdate = h.Sightings.Select(s => s.Species.Id.Id.ToString()).ToList();
@@ -132,8 +136,8 @@ namespace WildWatchAPI.Services
             {
                 var habitat = Builders<Habitat>.Filter.Where(h => h.Id == habitatId);
 
-                var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", habitatId)));
-                var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", habitatId)));
+                var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", new ObjectId(habitatId))));
+                var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", new ObjectId(habitatId))));
 
                 await _context.Habitats.DeleteOneAsync(habitat);
                 await _context.Species.UpdateManyAsync(speciesFilter, speciesUpdate);
@@ -175,11 +179,11 @@ namespace WildWatchAPI.Services
 
             HabitatSummary habitatSummary = new HabitatSummary()
             {
-                Id = new MongoDBRef("Habitats", habitatId),
+                Id = new MongoDBRef("Habitats", new ObjectId(habitatId)),
                 BorderPoints = h.BorderPoints
             };
 
-            var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", habitatId)));
+            var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", new ObjectId(habitatId))));
             var speciesUpdate = Builders<Species>.Update.Set("Habitats.$", habitatSummary);
             await _context.Species.UpdateManyAsync(speciesFilter, speciesUpdate);
 

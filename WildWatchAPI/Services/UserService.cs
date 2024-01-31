@@ -12,6 +12,8 @@ using WildWatchAPI.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using MongoDB.Bson;
+using MongoDB.Driver.GeoJsonObjectModel;
 
 namespace WildWatchAPI.Services
 {
@@ -202,24 +204,25 @@ namespace WildWatchAPI.Services
             {
                 var user = Builders<User>.Filter.Where(u => u.Id == userId);
 
-                var sightings = Builders<Sighting>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId));
+                var sightings = Builders<Sighting>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", new ObjectId(userId)));
 
-                var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", userId)));
-                var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", userId)));
+                var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", new ObjectId(userId))));
+                var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", new ObjectId(userId))));
 
-                var habitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId)));
-                var habitatsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Species.Id == new MongoDBRef("Users", userId)));
+                var habitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", new ObjectId(userId))));
+                var habitatsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", new ObjectId(userId))));
 
 
-                await _context.Users.DeleteOneAsync(user);
-                await _context.Sightings.DeleteManyAsync(sightings);
-                await _context.Species.UpdateManyAsync(speciesFilter, speciesUpdate);
-                await _context.Habitats.UpdateManyAsync(habitatsFilter, habitatsUpdate);
+                await _context.Users.DeleteOneAsync(session,user);
+                await _context.Sightings.DeleteManyAsync(session, sightings);
+                await _context.Species.UpdateManyAsync(session, speciesFilter, speciesUpdate);
+                await _context.Habitats.UpdateManyAsync(session, habitatsFilter, habitatsUpdate);
                 await session.CommitTransactionAsync();
             }
             catch(Exception)
             {
                 await session.AbortTransactionAsync();
+                throw new Exception("User service failed");
             }
         }
 
@@ -233,20 +236,212 @@ namespace WildWatchAPI.Services
             return user;
         }
 
+        //public async Task<User> UpdateAsync(string userId, UserUpdateDto user)
+        //{
+        //    using var session = await _context.MongoClient.StartSessionAsync();
+        //    session.StartTransaction();
+        //    try
+        //    {
+        //        var userFilter = Builders<User>.Filter.Where(u => u.Id == userId);
+        //        var userUpdate = Builders<User>.Update
+        //            .Set(u => u.Name, user.Name)
+        //            .Set(u => u.Email, user.Email)
+        //            .Set(u => u.AccountConfirmed, user.AccountConfirmed)
+        //            .Set(u => u.ImageUrl, user.ImageUrl)
+        //            .Set(u => u.DateOfBirth, user.DateOfBirth)
+        //            .Set(u => u.Location, user.Location);
+
+        //        await _context.Users.UpdateOneAsync(session, userFilter, userUpdate);
+
+        //        var userFromDatabase = await _context.Users.Find(session, userFilter).FirstOrDefaultAsync();
+        //        if (userFromDatabase == default)
+        //        {
+        //            throw new Exception("How???");
+        //        }
+
+        //        var userSummary = new UserSummary()
+        //        {
+        //            Id = new MongoDBRef("Users", userId),
+        //            Email = user.Email,
+        //            Name = user.Name,
+        //            NumberOfSightings = userFromDatabase.Sightings.Count()
+        //        };
+
+        //        //var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", userId)));
+        //        ////var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", userId)));
+        //        //var speciesUpdate = Builders<Species>.Update.Set("Sightings.Sighter.$", userSummary);
+        //        //await _context.Species.UpdateManyAsync(session,speciesFilter, speciesUpdate);
+
+        //        //var habitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId)));
+        //        ////var habitatsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId)));
+        //        //var habitatsUpdate= Builders<Habitat>.Update.Set("Sightings.Sighter.$", userSummary);
+        //        //await _context.Habitats.UpdateManyAsync(session, habitatsFilter, habitatsUpdate);
+
+        //        //await session.CommitTransactionAsync();
+        //        //return userFromDatabase;
+        //        var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", userId)));
+        //        var speciesUpdate = Builders<Species>.Update.Set("Sightings.$[element].Sighter", userSummary);
+        //        var speciesUpdateOptions = new UpdateOptions { ArrayFilters = new List<ArrayFilterDefinition> { new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("element.Sighter.Id.Id", userId)) } };
+        //        await _context.Species.UpdateManyAsync(session, speciesFilter, speciesUpdate, speciesUpdateOptions);
+
+
+        //        var habitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId)));
+        //        var habitatsUpdate = Builders<Habitat>.Update.Set("Sightings.$[element].Sighter", userSummary);
+        //        var habitatsUpdateOptions = new UpdateOptions { ArrayFilters = new List<ArrayFilterDefinition> { new BsonDocumentArrayFilterDefinition<BsonDocument>(new BsonDocument("element.Sighter.Id.Id", userId)) } };
+        //        await _context.Habitats.UpdateManyAsync(session, habitatsFilter, habitatsUpdate, habitatsUpdateOptions);
+
+
+        //        await session.CommitTransactionAsync();
+        //        return userFromDatabase;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        await session.AbortTransactionAsync();
+        //        throw new Exception("User service failed");
+        //    }
+        //}
+
         public async Task<User> UpdateAsync(string userId, UserUpdateDto user)
         {
-            var userFilter = Builders<User>.Filter.Where(u => u.Id == userId);
-            var userUpdate = Builders<User>.Update
-                .Set(u => u.Name, user.Name)
-                .Set(u => u.Email, user.Email)
-                .Set(u => u.AccountConfirmed, user.AccountConfirmed)
-                .Set(u => u.ImageUrl, user.ImageUrl)
-                .Set(u => u.DateOfBirth, user.DateOfBirth)
-                .Set(u => u.Location, user.Location);
+            using var session = await _context.MongoClient.StartSessionAsync();
+            session.StartTransaction();
+            try
+            {
+                var userFilter = Builders<User>.Filter.Where(u => u.Id == userId);
+                var userUpdate = Builders<User>.Update
+                    .Set(u => u.Name, user.Name)
+                    .Set(u => u.Email, user.Email)
+                    .Set(u => u.AccountConfirmed, user.AccountConfirmed)
+                    .Set(u => u.ImageUrl, user.ImageUrl)
+                    .Set(u => u.DateOfBirth, user.DateOfBirth)
+                    .Set(u => u.Location, user.Location);
 
+                await _context.Users.UpdateOneAsync(session, userFilter, userUpdate);
+
+                var userFromDatabase = await _context.Users.Find(session, userFilter).FirstOrDefaultAsync();
+                if (userFromDatabase == default)
+                {
+                    throw new Exception("How???");
+                }
+
+                var userSummary = new UserSummary()
+                {
+                    Id = new MongoDBRef("Users",new ObjectId( userId)),
+                    Email = user.Email,
+                    Name = user.Name,
+                    NumberOfSightings = userFromDatabase.Sightings.Count()
+                };
+
+                var sightingsFilter = Builders<Sighting>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", new ObjectId(userId)));
+                var sightingsUpdate = Builders<Sighting>.Update.Set(sig => sig.Sighter, userSummary);
+                await _context.Sightings.UpdateManyAsync(session, sightingsFilter,sightingsUpdate);
+
+                var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", new ObjectId(userId))));
+                var speciesUpdate = Builders<Species>.Update.Set("Sightings.$.Sighter", userSummary);
+                await _context.Species.UpdateManyAsync(session, speciesFilter, speciesUpdate);
+
+                var habitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", new ObjectId(userId))));
+                var habitatsUpdate = Builders<Habitat>.Update.Set("Sightings.$.Sighter", userSummary);
+                await _context.Habitats.UpdateManyAsync(session, habitatsFilter, habitatsUpdate);
+
+                await session.CommitTransactionAsync();
+                return userFromDatabase;
+            }
+            catch (Exception)
+            {
+                await session.AbortTransactionAsync();
+                throw new Exception("User service failed");
+            }
+        }
+
+        public async Task<User> AddMyFavouriteSpecies(string speciesId)
+        {
+            var id = string.Empty;
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                id = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(id))
+                {
+                    throw new Exception("Token error");
+                }
+            }
+            else
+            {
+                throw new Exception("Token error");
+            }
+            var userFilter = Builders<User>.Filter.Where(u => u.Id == id&& !u.FavouriteSpecies.Contains(new MongoDBRef("Species", new ObjectId(speciesId))));
+            var userUpdate = Builders<User>.Update.Push(u => u.FavouriteSpecies, new MongoDBRef("Species", new ObjectId(speciesId)));
             await _context.Users.UpdateOneAsync(userFilter, userUpdate);
 
             return await _context.Users.Find(userFilter).FirstOrDefaultAsync();
+
+        }
+
+        public async Task<User> RemoveMyFavouriteSpecies(string speciesId)
+        {
+            var id = string.Empty;
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                id = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(id))
+                {
+                    throw new Exception("Token error");
+                }
+            }
+            else
+            {
+                throw new Exception("Token error");
+            }
+            var userFilter = Builders<User>.Filter.Where(u => u.Id == id);
+            var userUpdate = Builders<User>.Update.Pull(u => u.FavouriteSpecies, new MongoDBRef("Species", new ObjectId(speciesId)));
+            await _context.Users.UpdateOneAsync(userFilter, userUpdate);
+
+            return await _context.Users.Find(userFilter).FirstOrDefaultAsync();
+
+        }
+
+        public async Task SetMyLocation(GeoJson2DGeographicCoordinates? location)
+        {
+            var id = string.Empty;
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                id = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(id))
+                {
+                    throw new Exception("Token error");
+                }
+            }
+            else
+            {
+                throw new Exception("Token error");
+            }
+            var userFilter = Builders<User>.Filter.Where(u => u.Id == id);
+            var userUpdate = Builders<User>.Update.Set(u => u.Location, location);
+
+            await _context.Users.UpdateOneAsync(userFilter, userUpdate);
+        }
+
+        public async Task<GeoJson2DGeographicCoordinates?> GetMyLocation()
+        {
+            var id = string.Empty;
+            if (_httpContextAccessor.HttpContext != null)
+            {
+                id = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(id))
+                {
+                    throw new Exception("Token error");
+                }
+            }
+            else
+            {
+                throw new Exception("Token error");
+            }
+            var user = await _context.Users.Find(u => u.Id == id).FirstOrDefaultAsync();
+            if (user == null)
+            {
+                throw new Exception("Invalid Id");
+            }
+            return user.Location;
         }
     }
 }

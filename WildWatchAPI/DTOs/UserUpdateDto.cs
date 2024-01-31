@@ -23,5 +23,9 @@ namespace WildWatchAPI.DTOs
             this.Location = u.Location;
         }
 
+        public UserUpdateDto()
+        {
+
+        }
     }
 }

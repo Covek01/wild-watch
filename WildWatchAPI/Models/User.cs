@@ -34,9 +34,9 @@ namespace WildWatchAPI.Models
         public string ImageUrl { get; set; }= null!;
         public DateTime DateOfBirth { get; set; }
         public GeoJson2DGeographicCoordinates? Location { get; set; }
-
+        [JsonIgnore]
         public List<SightingSummaryUser> Sightings { get; set; } = new();
-
+        [JsonIgnore]
         public List<MongoDBRef> FavouriteSpecies { get; set; } = new();
     }
 

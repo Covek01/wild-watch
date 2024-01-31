@@ -2,6 +2,7 @@
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
+using System.Text.Json.Serialization;
 
 namespace WildWatchAPI.Models
 {
@@ -41,10 +42,10 @@ namespace WildWatchAPI.Models
 
 
         public GeoJson2DGeographicCoordinates Location { get; set; } = null!;
-
+        [JsonIgnore]
         public UserSummary Sighter { get; set; } = null!;
 
-
+        [JsonIgnore]
         public SpeciesSummary Species { get; set; } = null!;
         public string? ImageUrl { get; set; }
 

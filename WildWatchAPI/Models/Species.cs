@@ -29,11 +29,12 @@ namespace WildWatchAPI.Models
         public string ScientificName { get; set; } = null!;
         public string ImageUrl { get; set; } = null!;
         public string Description { get; set; }= null!;
-        public string ConservationStatus { get; set; }= null!; 
+        public string ConservationStatus { get; set; }= null!;
 
+        [JsonIgnore]
         public List<SightingSummarySpecies> Sightings { get; set; } = new();
 
-
+        [JsonIgnore]
         public List<HabitatSummary> Habitats { get; set; } = new();
 
 
