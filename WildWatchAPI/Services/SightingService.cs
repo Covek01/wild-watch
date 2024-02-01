@@ -24,11 +24,8 @@ namespace WildWatchAPI.Services
 
         public async Task<string> CreateAsync(SightingDto s)
         {
-            using var session = await _context.MongoClient.StartSessionAsync();
-            try
-            {
-                session.StartTransaction();
-                var species = await _context.Species.Find(session,sp => sp.CommonName == s.CommonName && sp.ScientificName == s.ScientificName).FirstOrDefaultAsync();
+
+                var species = await _context.Species.Find(sp => sp.CommonName == s.CommonName && sp.ScientificName == s.ScientificName).FirstOrDefaultAsync();
                 var speciesId = species == null ? "" : species.Id;
                 if (species == default)
                 {
@@ -37,14 +34,21 @@ namespace WildWatchAPI.Services
                         Class = s.SpeciesClass,
                         CommonName = s.CommonName,
                         ScientificName = s.ScientificName,
-                        ImageUrl = s.PhotoUrl ?? "",
+                        ImageUrl = s.ImageUrl ?? "",
                         Description = s.Description,
                         ConsertvationStatus = s.ConservationStatus
                     };
 
                     speciesId = await _speciesService.CreateAsync(newSpecies);
-                    species = await _context.Species.Find(session, sp => sp.CommonName == s.CommonName && sp.ScientificName == s.ScientificName).FirstOrDefaultAsync();
+                    species = await _context.Species.Find( sp => sp.CommonName == s.CommonName && sp.ScientificName == s.ScientificName).FirstOrDefaultAsync();
                 }
+
+            using var session = await _context.MongoClient.StartSessionAsync();
+            try
+            {
+                session.StartTransaction();
+                if (species == default)
+                    throw new Exception("Species failed");
 
                 var speciesSummary = new SpeciesSummary()
                 {
@@ -54,7 +58,7 @@ namespace WildWatchAPI.Services
                     ImageUrl = species.ImageUrl??"",
                     Description = species.Description,
                     ConservationStatus = species.ConservationStatus,
-                    Id = new MongoDBRef("Species", new ObjectId(speciesId))
+                    Id = new MongoDBRef("Species", speciesId)
                 };
 
                 var user = await _context.Users.Find(session,u => u.Id == s.SighterId).FirstOrDefaultAsync();
@@ -68,7 +72,7 @@ namespace WildWatchAPI.Services
                     Email = user.Email,
                     Name = user.Name,
                     NumberOfSightings = user.Sightings.Count() + 1,
-                    Id = new MongoDBRef("Users", new ObjectId(user.Id))
+                    Id = new MongoDBRef("Users", user.Id)
                 };
 
                 var sighting = new Sighting()
@@ -84,7 +88,7 @@ namespace WildWatchAPI.Services
 
                 var sightingSummaryUser = new SightingSummaryUser()
                 {
-                    Id = new MongoDBRef("Sightings", new ObjectId(sighting.Id)),
+                    Id = new MongoDBRef("Sightings", sighting.Id),
                     Location = s.Location,
                     SightingTime = s.SightingTime,
                     Species = speciesSummary
@@ -96,7 +100,7 @@ namespace WildWatchAPI.Services
 
                 var sightingSummarySpecies = new SightingSummarySpecies()
                 {
-                    Id = new MongoDBRef("Sightings", new ObjectId(sighting.Id)),
+                    Id = new MongoDBRef("Sightings", sighting.Id),
                     Location = s.Location,
                     SightingTime = s.SightingTime,
                     Sighter = userSummary
@@ -105,16 +109,25 @@ namespace WildWatchAPI.Services
                 var speciesUpdate = Builders<Species>.Update.Push(sp => sp.Sightings, sightingSummarySpecies);
                 await _context.Species.UpdateOneAsync(session, speciesFilter, speciesUpdate);
 
+                //HabitatDto habitatDto = new HabitatDto()
+                //{
+                //    BorderPoints = new List<GeoJsonPoint<GeoJson2DGeographicCoordinates>>(),
+                //    Sightings = new List<SightingSummaryHabitat>()
+                //};
+                //var point = GeoJson.Point(new GeoJson2DGeographicCoordinates(s.Location.Longitude, s.Location.Latitude));
+                //habitatDto.BorderPoints.Add(point);
                 HabitatDto habitatDto = new HabitatDto()
                 {
                     BorderPoints = new List<GeoJsonPoint<GeoJson2DGeographicCoordinates>>(),
                     Sightings = new List<SightingSummaryHabitat>()
                 };
+
                 var point = GeoJson.Point(new GeoJson2DGeographicCoordinates(s.Location.Longitude, s.Location.Latitude));
                 habitatDto.BorderPoints.Add(point);
+
                 var sightingSummaryHabitat = new SightingSummaryHabitat()
                 {
-                    Id = new MongoDBRef("Sightings", new ObjectId(sighting.Id)),
+                    Id = new MongoDBRef("Sightings", sighting.Id),
                     Location = s.Location,
                     SightingTime = s.SightingTime,
                     Sighter = userSummary,
@@ -123,6 +136,8 @@ namespace WildWatchAPI.Services
                 habitatDto.Sightings.Add(sightingSummaryHabitat);
                 await _habitatService.CreateAsync(habitatDto);
 
+                //throw new Exception("SIKE");
+                await session.CommitTransactionAsync();
                 return sighting.Id;
             }
             catch(Exception)
@@ -150,14 +165,14 @@ namespace WildWatchAPI.Services
                 session.StartTransaction();
                 var sighting = Builders<Sighting>.Filter.Where(s => s.Id == sightingId);
 
-                var userSightingsFilter = Builders<User>.Filter.ElemMatch(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", new ObjectId(sightingId))));
-                var userSightingsUpdate = Builders<User>.Update.PullFilter(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", new ObjectId(sightingId))));
+                var userSightingsFilter = Builders<User>.Filter.ElemMatch(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", sightingId)));
+                var userSightingsUpdate = Builders<User>.Update.PullFilter(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", sightingId)));
 
-                var habitatSightingsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", new ObjectId(sightingId))));
-                var habitatSightingsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", new ObjectId(sightingId))));
+                var habitatSightingsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", sightingId)));
+                var habitatSightingsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", sightingId)));
 
-                var speciesSightingsFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Id == new MongoDBRef("Sightings", new ObjectId(sightingId))));
-                var speciesSightingsUpdate = Builders<Species>.Update.PullFilter(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Id == new MongoDBRef("Sightings", new ObjectId(sightingId))));
+                var speciesSightingsFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Id == new MongoDBRef("Sightings", sightingId)));
+                var speciesSightingsUpdate = Builders<Species>.Update.PullFilter(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Id == new MongoDBRef("Sightings", sightingId)));
 
 
                 await _context.Sightings.DeleteOneAsync(session, sighting);
@@ -181,9 +196,7 @@ namespace WildWatchAPI.Services
             }
         }
 
-        //ako je user promenjen treba da se skine sa user-a i da se stavi na drugog
-        //ako je lokacija promenjena treba i habitat da se promeni
-        // ako je vrsta promenjena treba da se skine sa te vrste i stavi na drugu
+        //only for small location changes, for major location changes delete and create new sighting
         public async Task<Sighting> UpdateAsync(string sightingsId,SightingDto s)
         {
             using var session = await _context.MongoClient.StartSessionAsync();
@@ -244,6 +257,7 @@ namespace WildWatchAPI.Services
                 //};
                 //await _context.Sightings.ReplaceOneAsync(session,sightingsId, sighting);
                 var sightingFilter = Builders<Sighting>.Filter.Where(sig=>sig.Id==sightingsId);
+                var sightingOld=await _context.Sightings.Find(sightingFilter).FirstOrDefaultAsync();
                 var sightingUpdate = Builders<Sighting>.Update
                     .Set(s => s.SightingTime, s.SightingTime)
                     .Set(s => s.Location, s.Location)
@@ -275,19 +289,45 @@ namespace WildWatchAPI.Services
                     SightingTime = s.SightingTime,
                 };
 
-                var userSightingsFilter = Builders<User>.Filter.ElemMatch(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", new ObjectId(sightingsId))));
-                var userSightingsUpdate = Builders<User>.Update.Set("Sightings.$", sightingSummaryUser);
+                if (sightingOld.Id == s.SighterId)
+                {
+                    var userSightingsFilter = Builders<User>.Filter.ElemMatch(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", sightingsId)));
+                    var userSightingsUpdate = Builders<User>.Update.Set("Sightings.$", sightingSummaryUser);
+                    await _context.Users.UpdateManyAsync(session, userSightingsFilter, userSightingsUpdate);
+                }
+                else
+                {
+                    var userSightingsFilter = Builders<User>.Filter.ElemMatch(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", sightingsId)));
+                    var userSightingsUpdate = Builders<User>.Update.PullFilter(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", sightingsId)));
+                    await _context.Users.UpdateManyAsync(session, userSightingsFilter, userSightingsUpdate);
+                    var newUserSightingsFilter = Builders<User>.Filter.Where(u => u.Id == user.Id);
+                    var newUserSightingsUpdate = Builders<User>.Update.Push(u => u.Sightings, sightingSummaryUser);
+                    await _context.Users.UpdateOneAsync(session, newUserSightingsFilter, newUserSightingsUpdate);
+                }
 
-                var habitatSightingsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", new ObjectId(sightingsId))));
+                var habitatSightingsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", sightingsId)));
                 var habitatSightingsUpdate = Builders<Habitat>.Update.Set("Sightings.$", sightingSummaryHabitat);
-
-                var speciesSightingsFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Id == new MongoDBRef("Sightings", new ObjectId(sightingsId))));
-                var speciesSightingsUpdate = Builders<Species>.Update.Set("Sightings.$", sightingSummarySpecies);
-
-
-                await _context.Users.UpdateManyAsync(session, userSightingsFilter, userSightingsUpdate);
                 await _context.Habitats.UpdateManyAsync(session, habitatSightingsFilter, habitatSightingsUpdate);
-                await _context.Species.UpdateManyAsync(session, speciesSightingsFilter, speciesSightingsUpdate);
+                var habitatLocationFilter = Builders<Habitat>.Filter.ElemMatch(h => h.BorderPoints, Builders<GeoJsonPoint<GeoJson2DGeographicCoordinates>>.Filter.Where(l => l.Coordinates.Latitude == s.Location.Latitude && l.Coordinates.Longitude == s.Location.Longitude));
+                var habitatLocationUpdate = Builders<Habitat>.Update.Set("BorderPoints.$", new GeoJsonPoint<GeoJson2DGeographicCoordinates>(s.Location));
+                await _context.Habitats.UpdateManyAsync(session, habitatLocationFilter, habitatLocationUpdate);
+
+                if (sightingOld.Species.Id.Id == species.Id)
+                {
+                    var speciesSightingsFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Id == new MongoDBRef("Sightings", sightingsId)));
+                    var speciesSightingsUpdate = Builders<Species>.Update.Set("Sightings.$", sightingSummarySpecies);
+                    await _context.Species.UpdateManyAsync(session, speciesSightingsFilter, speciesSightingsUpdate);
+                }
+                else
+                {
+                    var speciesSightingsFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Id == new MongoDBRef("Sightings", sightingsId)));
+                    var speciesSightingsUpdate = Builders<Species>.Update.PullFilter(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Id == new MongoDBRef("Sightings", sightingsId)));
+                    await _context.Species.UpdateManyAsync(session, speciesSightingsFilter, speciesSightingsUpdate);
+                    var newSpeciesFilter = Builders<Species>.Filter.Where(sp => sp.Id == speciesId);
+                    var newSpeciesUpdate = Builders<Species>.Update.Push(sp => sp.Sightings, sightingSummarySpecies);
+                    await _context.Species.UpdateOneAsync(session, newSpeciesFilter, newSpeciesUpdate);
+                }
+
 
                 var sighting = await _context.Sightings.Find(sig => sig.Id == sightingsId).FirstOrDefaultAsync();
                 await session.CommitTransactionAsync();
@@ -299,123 +339,6 @@ namespace WildWatchAPI.Services
                 throw new Exception("Sighting service failed");
             }
         }
-        //public async Task<Sighting> UpdateAsync(string sightingsId, SightingDto s)
-        //{
-        //    await DeleteAsync(sightingsId);
-        //    await CreateAsync(s);
-        //    return await _context.Sightings.Find(s=>s.Id==sightingsId).FirstOrDefaultAsync();
-        //    //using var session = await _context.MongoClient.StartSessionAsync();
-        //    //session.StartTransaction();
-        //    //try
-        //    //{
-        //    //    var species = await _context.Species.Find(sp => sp.CommonName == s.CommonName && sp.ScientificName == s.ScientificName).FirstOrDefaultAsync();
-        //    //    var speciesId = species.Id ?? "";
-        //    //    if (species == default)
-        //    //    {
-        //    //        var newSpecies = new SpeciesDto()
-        //    //        {
-        //    //            Class = s.SpeciesClass,
-        //    //            CommonName = s.CommonName,
-        //    //            ScientificName = s.ScientificName,
-        //    //            ImageUrl = s.PhotoUrl ?? "",
-        //    //            Description = s.Description,
-        //    //            ConsertvationStatus = s.ConservationStatus
-        //    //        };
-
-        //    //        speciesId = await _speciesService.CreateAsync(newSpecies);
-        //    //        species = await _context.Species.Find(sp => sp.CommonName == s.CommonName && sp.ScientificName == s.ScientificName).FirstOrDefaultAsync();
-        //    //    }
-
-        //    //    var speciesSummary = new SpeciesSummary()
-        //    //    {
-        //    //        Class = species.Class,
-        //    //        CommonName = s.CommonName,
-        //    //        ScientificName = s.ScientificName,
-        //    //        ImageUrl = species.ImageUrl ?? "",
-        //    //        Description = species.Description,
-        //    //        ConservationStatus = species.ConservationStatus,
-        //    //        Id = new MongoDBRef("Species", speciesId)
-        //    //    };
-
-        //    //    var user = await _context.Users.Find(u => u.Id == s.SighterId).FirstOrDefaultAsync();
-        //    //    if (user == default)
-        //    //    {
-        //    //        throw new Exception("Invalid User Id");
-        //    //    }
-
-        //    //    var userSummary = new UserSummary()
-        //    //    {
-        //    //        Email = user.Email,
-        //    //        Name = user.Name,
-        //    //        NumberOfSightings = user.Sightings.Count() + 1,
-        //    //        Id = new MongoDBRef("Users", user.Id)
-        //    //    };
-
-        //    //    var sighting = new Sighting()
-        //    //    {
-        //    //        SightingTime = s.SightingTime,
-        //    //        Location = s.Location,
-        //    //        ImageUrl = s.PhotoUrl ?? "",
-        //    //        Sighter = userSummary,
-        //    //        Species = speciesSummary
-        //    //    };
-        //    //    await _context.Sightings.ReplaceOneAsync(sightingsId,sighting);
-
-
-        //    //    var sightingSummaryUser = new SightingSummaryUser()
-        //    //    {
-        //    //        Id = new MongoDBRef("Sightings", sighting.Id),
-        //    //        Location = s.Location,
-        //    //        SightingTime = s.SightingTime,
-        //    //        Species = speciesSummary
-        //    //    };
-        //    //    //var userFilter = Builders<User>.Filter.Where(u => u.Id == user.Id);
-        //    //    //var userUpdate = Builders<User>.Update.Push(u => u.Sightings, sightingSummaryUser);
-        //    //    var userSightingsFilter = Builders<User>.Filter.ElemMatch(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", sightingsId)));
-        //    //    var userSightingsUpdate = Builders<User>.Update.Set("Sightings.$", sightingSummaryUser);
-        //    //    await _context.Users.UpdateOneAsync(userSightingsFilter, userSightingsUpdate);
-
-
-        //    //    var sightingSummarySpecies = new SightingSummarySpecies()
-        //    //    {
-        //    //        Id = new MongoDBRef("Sightings", sighting.Id),
-        //    //        Location = s.Location,
-        //    //        SightingTime = s.SightingTime,
-        //    //        Sighter = userSummary
-        //    //    };
-        //    //    //var speciesFilter = Builders<Species>.Filter.Where(sp => sp.Id == speciesId);
-        //    //    //var speciesUpdate = Builders<Species>.Update.Push(sp => sp.Sightings, sightingSummarySpecies);
-        //    //    var speciesSightingsFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Id == new MongoDBRef("Sightings", sightingsId)));
-        //    //    var speciesSightingsUpdate = Builders<Species>.Update.Set("Sightings.$", sightingSummarySpecies);
-        //    //    await _context.Species.UpdateOneAsync(speciesSightingsFilter, speciesSightingsUpdate);
-
-        //    //    HabitatDto habitatDto = new HabitatDto()
-        //    //    {
-        //    //        BorderPoints = new List<GeoJsonPoint<GeoJson2DGeographicCoordinates>>(),
-        //    //        Sightings = new List<SightingSummaryHabitat>()
-        //    //    };
-        //    //    var point = GeoJson.Point(new GeoJson2DGeographicCoordinates(s.Location.Longitude, s.Location.Latitude));
-        //    //    habitatDto.BorderPoints.Add(point);
-        //    //    var sightingSummaryHabitat = new SightingSummaryHabitat()
-        //    //    {
-        //    //        Id = new MongoDBRef("Sightings", sighting.Id),
-        //    //        Location = s.Location,
-        //    //        SightingTime = s.SightingTime,
-        //    //        Sighter = userSummary,
-        //    //        Species = speciesSummary
-        //    //    };
-        //    //    habitatDto.Sightings.Add(sightingSummaryHabitat);
-        //    //    await _habitatService.UpdateAsync()
-
-        //    //    return sighting.Id;
-        //    //}
-        //    //catch (Exception)
-        //    //{
-        //    //    await session.AbortTransactionAsync();
-        //    //    throw new Exception("Sighting failed");
-        //    //}
-        //}
-
 
     }
 }

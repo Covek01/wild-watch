@@ -43,16 +43,16 @@ namespace WildWatchAPI.Services
                 session.StartTransaction();
                 var species = Builders<Species>.Filter.Where(s => s.Id == speciesId);
                 
-                var sightings=Builders<Sighting>.Filter.Where(s=>s.Species.Id==new MongoDBRef("Species", new ObjectId(speciesId)));
+                var sightings=Builders<Sighting>.Filter.Where(s=>s.Species.Id==new MongoDBRef("Species", speciesId));
 
-                var habitatsToUpdate = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings,Builders<SightingSummaryHabitat>.Filter.Where(s => s.Species.Id == new MongoDBRef("Species", new ObjectId(speciesId))));
-                var habitatsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s=>s.Species.Id==new MongoDBRef("Species", new ObjectId(speciesId))));
+                var habitatsToUpdate = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings,Builders<SightingSummaryHabitat>.Filter.Where(s => s.Species.Id == new MongoDBRef("Species", speciesId)));
+                var habitatsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s=>s.Species.Id==new MongoDBRef("Species", speciesId)));
 
                 var userFilterFavourite = Builders<User>.Filter.ElemMatch(u => u.FavouriteSpecies, Builders<MongoDBRef>.Filter.Where(s => s.Id == speciesId));
                 var userUpdateFavourite = Builders<User>.Update.PullFilter(u => u.FavouriteSpecies, Builders<MongoDBRef>.Filter.Where(s => s.Id == speciesId));
 
-                var userFilterSightings= Builders<User>.Filter.ElemMatch(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Species.Id == new MongoDBRef("Species",new ObjectId(speciesId))));
-                var userUpdateSightings = Builders<User>.Update.PullFilter(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Species.Id == new MongoDBRef("Species", new ObjectId(speciesId))));
+                var userFilterSightings= Builders<User>.Filter.ElemMatch(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Species.Id == new MongoDBRef("Species",speciesId)));
+                var userUpdateSightings = Builders<User>.Update.PullFilter(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Species.Id == new MongoDBRef("Species", speciesId)));
 
                 await _context.Users.UpdateManyAsync(session,userFilterSightings, userUpdateSightings);
                 await _context.Users.UpdateManyAsync(session, userFilterFavourite, userUpdateFavourite);
@@ -97,15 +97,15 @@ namespace WildWatchAPI.Services
                     Id = new MongoDBRef("Species", speciesId)
                 };
 
-                var sightingsFilter = Builders<Sighting>.Filter.Where(sig => sig.Species.Id == new MongoDBRef("Species", new ObjectId(speciesId)));
+                var sightingsFilter = Builders<Sighting>.Filter.Where(sig => sig.Species.Id == new MongoDBRef("Species", speciesId));
                 var sightingsUpdate = Builders<Sighting>.Update.Set(sig => sig.Species, speciesSummary);
                 await _context.Sightings.UpdateManyAsync(session, sightingsFilter, sightingsUpdate);
 
-                var habitatsToUpdate = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Species.Id == new MongoDBRef("Species", new ObjectId(speciesId))));
+                var habitatsToUpdate = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Species.Id == new MongoDBRef("Species", speciesId)));
                 var habitatsUpdate = Builders<Habitat>.Update.Set("Sightings.$.Species", speciesSummary);
                 await _context.Habitats.UpdateManyAsync(session, habitatsToUpdate, habitatsUpdate);
 
-                var userFilterSightings = Builders<User>.Filter.ElemMatch(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Species.Id == new MongoDBRef("Species", new ObjectId(speciesId))));
+                var userFilterSightings = Builders<User>.Filter.ElemMatch(u => u.Sightings, Builders<SightingSummaryUser>.Filter.Where(s => s.Species.Id == new MongoDBRef("Species", speciesId)));
                 var userUpdateSightings = Builders<User>.Update.Set("Sightings.$.Species", speciesSummary);
                 await _context.Users.UpdateManyAsync(session, userFilterSightings, userUpdateSightings);
 
