@@ -4,14 +4,32 @@ import './App.css';
 import Bar from './components/crucials/Bar'
 import { Routes, Route, Navigate } from "react-router-dom"
 import Homepage from './components/homepage/Homepage'
+import { AuthStateProvider } from './contexts/auth.context';
+import AuthenticatedGuard from './routeGuards/AuthenticatedGuard';
+import { SignIn } from './components/signIn/signIn';
+import { SignUp } from './components/signup/signup';
 
 function App() {
   return (
     <>
-      <Routes>
-        <Route index element={<Navigate to="/homepage" replace/>}></Route>
-        <Route path="/homepage" element={<Homepage />} />
-      </Routes>
+      <AuthStateProvider>
+        <Routes>
+          <Route>
+            <Route index element={<Navigate to="/homepage" replace />}></Route>
+            <Route path="/homepage" element={<Homepage />} />
+
+            <Route
+              path="/signin"
+              element={<AuthenticatedGuard>{<SignIn />}</AuthenticatedGuard>}
+            ></Route>
+            <Route
+              path="/signup"
+              element={<AuthenticatedGuard>{<SignUp />}</AuthenticatedGuard>}
+            ></Route>
+            
+          </Route>
+        </Routes>
+      </AuthStateProvider>
     </>
   );
 }

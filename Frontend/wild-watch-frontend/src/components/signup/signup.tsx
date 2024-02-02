@@ -8,9 +8,10 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import {UserRegister} from "../../dtos/userRegister";
+import { UserRegister } from "../../dtos/userRegister";
 // import { api } from "../../services/Service";
 import { useCallback } from "react";
 
@@ -18,11 +19,8 @@ interface FormInputs {
     name: string;
     password: string;
     email: string;
-    phone: string;
     repeatPassword: string;
-    country: string;
-    city: string;
-    isAuthor: boolean;
+    dateOfBirth: Date;
 }
 
 
@@ -32,6 +30,7 @@ export const SignUp: React.FC = () => {
         register,
         handleSubmit,
         getValues,
+        setValue,
         formState: { errors },
     } = useForm<FormInputs>({
         reValidateMode: "onChange",
@@ -44,7 +43,7 @@ export const SignUp: React.FC = () => {
             name: data.name,
             email: data.email,
             password: data.password,
-            dateOfBirth:data.dateOfBirth
+            dateOfBirth: data.dateOfBirth
         };
         console.log(exampleUser);
 
@@ -99,12 +98,6 @@ export const SignUp: React.FC = () => {
                     {...register("email", { required: true })}
                 ></TextField>
                 <TextField
-                    label="Phone number"
-                    className="form-field"
-                    error={Boolean(errors.phone)}
-                    {...register("phone", { required: false })}
-                ></TextField>
-                <TextField
                     label="Password"
                     type="password"
                     className="form-field"
@@ -123,9 +116,22 @@ export const SignUp: React.FC = () => {
                     error={Boolean(errors.repeatPassword)}
                     helperText={errors.repeatPassword && "Passwords don't match"}
                 ></TextField>
-               
-                
-                
+
+                <DatePicker
+                    label="Date of Birth"
+                    value={getValues("dateOfBirth")}
+                    onChange={(date) => setValue("dateOfBirth", date??new Date(Date.now()))}
+                    // renderInput={(startProps, endProps) => (
+                    //     <>
+                    //         <TextField
+                    //             {...startProps}
+                    //             helperText={errors.dateOfBirth && "Date of Birth is required"}
+                    //         />
+                    //     </>
+                    // )}
+                />
+
+
                 <Button type="submit" variant="contained" color="primary">
                     Sign Up
                 </Button>
