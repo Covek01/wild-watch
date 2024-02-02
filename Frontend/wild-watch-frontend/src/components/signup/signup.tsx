@@ -121,6 +121,13 @@ export const SignUp: React.FC = () => {
                     label="Date of Birth"
                     value={getValues("dateOfBirth")}
                     onChange={(date) => setValue("dateOfBirth", date??new Date(Date.now()))}
+                    className="form-field"
+                    
+                    // className="form-field"
+                    // error={Boolean(errors.dateOfBirth)}
+                    // helperText={errors.dateOfBirth && "Date of birth is required"}
+                    // {...register("dateOfBirth", { required: true })}
+
                     // renderInput={(startProps, endProps) => (
                     //     <>
                     //         <TextField
