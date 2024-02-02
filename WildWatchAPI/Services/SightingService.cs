@@ -118,23 +118,21 @@ namespace WildWatchAPI.Services
                 //habitatDto.BorderPoints.Add(point);
                 HabitatDto habitatDto = new HabitatDto()
                 {
-                    BorderPoints = new List<GeoJsonPoint<GeoJson2DGeographicCoordinates>>(),
                     Sightings = new List<SightingSummaryHabitat>()
                 };
 
                 var point = GeoJson.Point(new GeoJson2DGeographicCoordinates(s.Location.Longitude, s.Location.Latitude));
-                habitatDto.BorderPoints.Add(point);
 
                 var sightingSummaryHabitat = new SightingSummaryHabitat()
                 {
                     Id = new MongoDBRef("Sightings", sighting.Id),
-                    Location = s.Location,
+                    Location = GeoJson.Point(s.Location),
                     SightingTime = s.SightingTime,
                     Sighter = userSummary,
                     Species = speciesSummary
                 };
                 habitatDto.Sightings.Add(sightingSummaryHabitat);
-                await _habitatService.CreateAsync(habitatDto);
+                await _habitatService.CreateAsync(session, habitatDto);
 
                 //throw new Exception("SIKE");
                 await session.CommitTransactionAsync();
@@ -276,7 +274,7 @@ namespace WildWatchAPI.Services
                 var sightingSummaryHabitat = new SightingSummaryHabitat()
                 {
                     Id = new MongoDBRef("Sightings", sightingsId),
-                    Location = s.Location,
+                    Location =GeoJson.Point( s.Location),
                     SightingTime = s.SightingTime,
                     Sighter = userSummary,
                     Species = speciesSummary
@@ -308,7 +306,7 @@ namespace WildWatchAPI.Services
                 var habitatSightingsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Id == new MongoDBRef("Sightings", sightingsId)));
                 var habitatSightingsUpdate = Builders<Habitat>.Update.Set("Sightings.$", sightingSummaryHabitat);
                 await _context.Habitats.UpdateManyAsync(session, habitatSightingsFilter, habitatSightingsUpdate);
-                var habitatLocationFilter = Builders<Habitat>.Filter.ElemMatch(h => h.BorderPoints, Builders<GeoJsonPoint<GeoJson2DGeographicCoordinates>>.Filter.Where(l => l.Coordinates.Latitude == s.Location.Latitude && l.Coordinates.Longitude == s.Location.Longitude));
+                var habitatLocationFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(l => l.Location.Coordinates.Latitude == s.Location.Latitude && l.Location.Coordinates.Longitude == s.Location.Longitude));
                 var habitatLocationUpdate = Builders<Habitat>.Update.Set("BorderPoints.$", new GeoJsonPoint<GeoJson2DGeographicCoordinates>(s.Location));
                 await _context.Habitats.UpdateManyAsync(session, habitatLocationFilter, habitatLocationUpdate);
 

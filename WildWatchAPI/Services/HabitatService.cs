@@ -39,7 +39,7 @@ namespace WildWatchAPI.Services
             //var keys = Builders<Habitat>.IndexKeys.Geo2DSphere("BorderPoints");
             //var model = new CreateIndexModel<Habitat>(keys);
             //_context.Habitats.Indexes.CreateOne(model);
-            var indexDef = Builders<Habitat>.IndexKeys.Geo2DSphere("BorderPoints.Location");
+            var indexDef = Builders<Habitat>.IndexKeys.Geo2DSphere("Sightings.Location");
             var indexModel = new CreateIndexModel<Habitat>(indexDef);
             _context.Habitats.Indexes.CreateOne(indexModel);
         }
@@ -80,7 +80,7 @@ namespace WildWatchAPI.Services
 
                     //var nearHabitats = await _context.Habitats.Find(h => h.BorderPoints.Any(p => CloserThanMeters(p, habitat.BorderPoints))).ToListAsync();
                     //var nearHabitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.BorderPoints, Builders<GeoJsonPoint<GeoJson2DGeographicCoordinates>>.Filter.Where(p => CloserThanMeters(p, habitat.BorderPoints)));
-                    var nearHabitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.BorderPoints, Builders<GeoJsonPoint<GeoJson2DGeographicCoordinates>>.Filter.Where(p => p.Coordinates.Longitude == 45));
+                    var nearHabitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s=>s.Location.Coordinates.Longitude==45));
 
                     var nearHabitats = await _context.Habitats.Find(session,nearHabitatsFilter).ToListAsync();
 
@@ -92,7 +92,6 @@ namespace WildWatchAPI.Services
 
                     nearHabitats.ForEach(async h => {
                         habitat.Sightings.AddRange(h.Sightings);
-                        habitat.BorderPoints.AddRange(h.BorderPoints);
                         await DeleteAsync(h.Id);
                     });
 
@@ -101,7 +100,6 @@ namespace WildWatchAPI.Services
                 await UpdateAsync(habitatId,
                     new HabitatDto()
                     {
-                        BorderPoints=habitat.BorderPoints,
                         Sightings=habitat.Sightings
                     }
                  );
@@ -113,53 +111,53 @@ namespace WildWatchAPI.Services
                 await session.AbortTransactionAsync();
             }
         }
-        public async Task<string> CreateAsync(HabitatDto h)
+        public async Task<string> CreateAsync(IClientSessionHandle session,HabitatDto h)
         {
-            //using var session = await _context.MongoClient.StartSessionAsync();
-            //session.StartTransaction();
-            //try
-            //{
+            try
+            {
+                var maxDistance = double.Parse(_configuration.GetSection("MaxDistanceHabitatMeters").Value ?? "0");
+
+                //var nearHabitatsFilter = Builders<Habitat>.Filter.GeoWithinCenterSphere(h => h.Sightings.Any(), sourceHabitat.Sightings[0].Location.Coordinates.Longitude, sourceHabitat.Sightings[0].Location.Coordinates.Latitude, maxDistance / (1000 * 6378.1));
+                var nearHabitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>
+                    .Filter.GeoWithinCenterSphere(sig =>
+                    sig.Location, h.Sightings[0].Location.Coordinates.Longitude, h.Sightings[0].Location.Coordinates.Latitude, maxDistance / (1000 * 6378.1)));
+
+                var nearHabitats = await _context.Habitats.Find(session, nearHabitatsFilter).ToListAsync();
+
                 Habitat habitat = new Habitat()
                 {
-                    BorderPoints = new List<GeoJsonPoint<GeoJson2DGeographicCoordinates>>(),
                     Sightings = new List<SightingSummaryHabitat>()
                 };
-                //habitat.BorderPoints.Add(GeoJson.Point(new GeoJson2DGeographicCoordinates(20, 20)));
-               
-                habitat.BorderPoints.Add(new GeoJsonPoint<GeoJson2DGeographicCoordinates>(new GeoJson2DGeographicCoordinates(20, 30)));
-                await _context.Habitats.InsertOneAsync( habitat);
-                //var borderPoint = h.BorderPoints[0];
-                //Console.WriteLine($"BorderPoint: Type={borderPoint.Type}, Coordinates=[{borderPoint.Coordinates.Longitude}, {borderPoint.Coordinates.Latitude}]");
+                habitat.Sightings.AddRange(h.Sightings);
+                foreach (var hab in nearHabitats)
+                {
+                    habitat.Sightings.AddRange(hab.Sightings);
+                    await this.SessionDeleteAsync(session,hab.Id);
+                }
+                await _context.Habitats.InsertOneAsync(session, habitat);
 
-                //habitat.BorderPoints.Add(borderPoint);
-                //habitat.Sightings.Add(h.Sightings[0]);
-                //await _context.Habitats.InsertOneAsync(session, habitat);
-                ////habitat.BorderPoints.Add(h.BorderPoints[0]);
-                ////habitat.Sightings.Add(h.Sightings[0]);
-                ////await _context.Habitats.InsertOneAsync(session, habitat);
+                HabitatSummary habitatSummary = new HabitatSummary()
+                {
+                    Id = new MongoDBRef("Habitats", habitat.Id)
+                };
 
-                //////////////////////////////////////////HabitatSummary habitatSummary = new HabitatSummary()
-                //////////////////////////////////////////{
-                //////////////////////////////////////////    BorderPoints = h.BorderPoints,
-                //////////////////////////////////////////    Id = new MongoDBRef("Habitats",habitat.Id)
-                //////////////////////////////////////////};
+                var speciesToUpdate = h.Sightings.Select(s => s.Species.Id.Id.ToString()).ToList();
+                var speciesFilter = Builders<Species>.Filter.In(s => s.Id, speciesToUpdate);
+                var speciesUpdate = Builders<Species>.Update.Push(s => s.Habitats, habitatSummary);
+                await _context.Species.UpdateManyAsync(session, speciesFilter, speciesUpdate);
 
-                //////////////////////////////////////////var speciesToUpdate = h.Sightings.Select(s => s.Species.Id.Id.ToString()).ToList();
-                //////////////////////////////////////////var speciesFilter = Builders<Species>.Filter.In(s => s.Id, speciesToUpdate);
-                //////////////////////////////////////////var speciesUpdate = Builders<Species>.Update.Push(s => s.Habitats, habitatSummary);
-                //////////////////////////////////////////await _context.Species.UpdateManyAsync( speciesFilter, speciesUpdate);
+                return "Done";
+                //var sourceHabitat = await _context.Habitats.Find(session,h => h.Id == habitat.Id).FirstOrDefaultAsync();
 
-                //////////////////////////////////////////var sourceHabitat = await _context.Habitats.Find(h => h.Id == habitat.Id).FirstOrDefaultAsync();
+                //var nearbyHabitats = await _context.Habitats.Aggregate()
+                //    .NearSphere()
+                //    .ToListAsync();
 
-                //throw new Exception("SIKE");
-                //await session.CommitTransactionAsync();
-                return "not done";
-            //}
-            //catch (Exception)
-            //{
-                //await session.AbortTransactionAsync();
-                //throw new Exception("Habitat service failed");
-            //}
+            }
+            catch (Exception)
+            {
+                throw new Exception("Habitat service failed");
+            }
         }
         //public async Task<string> CreateAsync(HabitatDto h)
         //{
@@ -196,6 +194,16 @@ namespace WildWatchAPI.Services
         //        throw new Exception("Habitat failed");
         //    }
         //}
+        public async Task SessionDeleteAsync(IClientSessionHandle session, string habitatId)
+        {
+            var habitat = Builders<Habitat>.Filter.Where(h => h.Id == habitatId);
+
+            var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", habitatId)));
+            var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", habitatId)));
+
+            await _context.Habitats.DeleteOneAsync(session, habitat);
+            await _context.Species.UpdateManyAsync(session, speciesFilter, speciesUpdate);
+        }
 
         public async Task DeleteAsync(string habitatId)
         {
@@ -246,7 +254,6 @@ namespace WildWatchAPI.Services
                 var oldHabitat = await _context.Habitats.Find(h => h.Id == habitatId).FirstOrDefaultAsync();
                 Habitat habitat = new Habitat()
                 {
-                    BorderPoints = h.BorderPoints,
                     Sightings = h.Sightings,
                     Id = habitatId
                 };
@@ -255,7 +262,6 @@ namespace WildWatchAPI.Services
                 HabitatSummary habitatSummary = new HabitatSummary()
                 {
                     Id = new MongoDBRef("Habitats", habitatId),
-                    BorderPoints = h.BorderPoints
                 };
 
                 var speciesToRemoveUpdate = oldHabitat.Sightings.Select(s => s.Species.Id.Id.ToString()).ToList();

@@ -19,15 +19,16 @@ namespace WildWatchAPI.Controllers
         [HttpPost("create")]
         public async Task<ActionResult> CreateHabitat([FromBody] HabitatDto h) 
         {
-            try
-            {
-                var result=await _habitatService.CreateAsync(h);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return NotFound("Habitat is created automatically with sightings");
+            //try
+            //{
+            //    var result=await _habitatService.CreateAsync(h);
+            //    return Ok(result);
+            //}
+            //catch (Exception ex)
+            //{
+            //    return BadRequest(ex.Message);
+            //}
         }
 
         [HttpGet("read/{id}")]

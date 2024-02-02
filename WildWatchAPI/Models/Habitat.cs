@@ -9,14 +9,14 @@ namespace WildWatchAPI.Models
     {
         public MongoDBRef Id { get; set; } = null!;
 
-        public List<GeoJsonPoint<GeoJson2DGeographicCoordinates>> BorderPoints { get; set; } = new();
+        //public List<GeoJsonPoint<GeoJson2DGeographicCoordinates>> BorderPoints { get; set; } = new();
     }
     public class Habitat
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
-        public List<GeoJsonPoint<GeoJson2DGeographicCoordinates>> BorderPoints { get; set; } = new List<GeoJsonPoint<GeoJson2DGeographicCoordinates>>();
+        //public List<GeoJsonPoint<GeoJson2DGeographicCoordinates>> BorderPoints { get; set; } = new List<GeoJsonPoint<GeoJson2DGeographicCoordinates>>();
         public List<SightingSummaryHabitat> Sightings { get; set; } = new();
     }
 }

@@ -10,11 +10,13 @@ namespace WildWatchAPI.Services
     public class SpeciesService : ISpeciesService
     {
         public readonly IDbContext _context;
-
+        private readonly IHabitatService _habitatService;
         public SpeciesService(
-            IDbContext context) 
+            IDbContext context,
+            IHabitatService habitatService) 
         {
             _context = context;
+            _habitatService= habitatService;
         }
 
         public async Task<string> CreateAsync(SpeciesDto s)
@@ -59,6 +61,13 @@ namespace WildWatchAPI.Services
                 await _context.Habitats.UpdateManyAsync(session, habitatsToUpdate, habitatsUpdate);
                 await _context.Species.DeleteOneAsync(session, species);
                 await _context.Sightings.DeleteManyAsync(session, sightings);
+
+                var emptyHabitatsFilter = Builders<Habitat>.Filter.Where(h => h.Sightings.Count == 0);
+                var emptyHabitats = await _context.Habitats.Find(session, emptyHabitatsFilter).ToListAsync();
+                foreach (var habitat in emptyHabitats)
+                {
+                    await _habitatService.DeleteAsync(habitat.Id);
+                }
 
                 await session.CommitTransactionAsync();
             }
