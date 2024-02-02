@@ -9,7 +9,7 @@ const Homepage:React.FC = () => {
     return (
         <>
             <Bar />
-            <Box style={{width: '80px', height: '80px'}}>
+            <Box style={{width: '80%'}}>
                 <Map />
             </Box>
 
