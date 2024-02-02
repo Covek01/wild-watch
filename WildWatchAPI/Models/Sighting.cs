@@ -27,7 +27,7 @@ namespace WildWatchAPI.Models
     {
         public MongoDBRef Id { get; set; } = null!;
         public DateTime SightingTime { get; set; }
-        public GeoJson2DGeographicCoordinates Location { get; set; } = null!;
+        public GeoJsonPoint<GeoJson2DGeographicCoordinates> Location { get; set; } = null!;
         public SpeciesSummary Species { get; set; } = null!;
 
         public UserSummary Sighter { get; set; } = null!;
