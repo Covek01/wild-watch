@@ -8,6 +8,7 @@ import { AuthStateProvider } from './contexts/auth.context';
 import AuthenticatedGuard from './routeGuards/AuthenticatedGuard';
 import { SignIn } from './components/signIn/signIn';
 import { SignUp } from './components/signup/signup';
+import SpeciesInfo from './components/species-info/SpeciesInfo';
 
 function App() {
   return (
@@ -15,8 +16,9 @@ function App() {
       <AuthStateProvider>
         <Routes>
           <Route>
-            <Route index element={<Navigate to="/homepage" replace />}></Route>
+            <Route index element={<Navigate to="/speciesinfo" replace />}></Route>
             <Route path="/homepage" element={<Homepage />} />
+            <Route path="/speciesinfo" element={<SpeciesInfo />} />
 
             <Route
               path="/signin"
@@ -28,7 +30,7 @@ function App() {
             ></Route>
             
           </Route>
-        </Routes>
+      </Routes>
       </AuthStateProvider>
     </>
   );
