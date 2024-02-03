@@ -14,6 +14,7 @@ import { ThemeProvider } from '@emotion/react';
 import { SnackbarProvider } from './contexts/snackbar.context';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import NotAuthenticatedGuard from './routeGuards/NotAuthenticatedGuard';
 
 function App() {
   return (
@@ -26,7 +27,7 @@ function App() {
                 <Route>
                   <Route index element={<Navigate to="/speciesinfo" replace />}></Route>
                   <Route path="/homepage" element={<Homepage />} />
-                  <Route path="/speciesinfo" element={<SpeciesInfo />} />
+                  <Route path="/speciesinfo" element={<NotAuthenticatedGuard>{<SpeciesInfo />}</NotAuthenticatedGuard>}></Route>
 
                   <Route
                     path="/signin"
