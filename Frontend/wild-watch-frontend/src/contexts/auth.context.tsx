@@ -14,7 +14,7 @@ import {
     lsSetToken,
     lsSetUser,
   } from "../utils/helpers";
-  import jwtDecode from "jwt-decode";
+  import * as jwtDecode from "jwt-decode";
   
   interface AuthState {
     user: User;

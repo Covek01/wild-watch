@@ -2,12 +2,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../contexts/auth.context"
 import { useForm } from "react-hook-form";
 // import { api } from "../../services/Service";
-import {User} from "../../models/User";
-import { Box, Button, Grid, Stack, TextField } from "@mui/material";
+import { User } from "../../models/User";
+import { Box, Button, Grid, SnackbarContent, Stack, TextField } from "@mui/material";
+import UserService from "../../services/UserService";
+import { useSnackbar } from "../../contexts/snackbar.context";
 
 
 export const SignIn: React.FC = () => {
-
+    const snackBar = useSnackbar();
     const { signin } = useAuthContext();
     const navigate = useNavigate();
 
@@ -19,17 +21,18 @@ export const SignIn: React.FC = () => {
         reValidateMode: "onSubmit",
     });
 
-    const onSubmit = handleSubmit((creds) => {
-        // api
-        //     .post<{ user: User; session: { id: string; expires: string } }>(
-        //         `/user/signin`,
-        //         creds
-        //     )
-        //     .then(({ data }) => {
-        //         signin(data);
-        //         navigate("/personal");
-        //     })
-        //     .catch((err) => { });
+    const onSubmit = handleSubmit(async (creds) => {
+        const { data, status } = await UserService.Signin(creds.email, creds.password);
+
+        if (status === 200) {
+            signin({ user: data, authToken: data.accessToken });
+            navigate('/');
+        } else {
+            snackBar.openSnackbar({
+                message: 'Email or password wrong',
+                severity: 'error',
+            })
+        }
     });
 
 

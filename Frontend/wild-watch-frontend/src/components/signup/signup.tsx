@@ -14,6 +14,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserRegister } from "../../dtos/userRegister";
 // import { api } from "../../services/Service";
 import { useCallback } from "react";
+import UserService from "../../services/UserService";
+import { useSnackbar } from "../../contexts/snackbar.context";
 
 interface FormInputs {
     name: string;
@@ -26,6 +28,8 @@ interface FormInputs {
 
 
 export const SignUp: React.FC = () => {
+    const snackBar = useSnackbar();
+
     const {
         register,
         handleSubmit,
@@ -37,24 +41,30 @@ export const SignUp: React.FC = () => {
     });
     const navigate = useNavigate();
 
-    const onSubmit = (data: FormInputs) => {
-        console.log(data);
+    const onSubmit = async (creds: FormInputs) => {
+        console.log(creds);
         let exampleUser: UserRegister & { password: string } = {
-            name: data.name,
-            email: data.email,
-            password: data.password,
-            dateOfBirth: data.dateOfBirth
+            name: creds.name,
+            email: creds.email,
+            password: creds.password,
+            dateOfBirth: creds.dateOfBirth
         };
         console.log(exampleUser);
 
-        // api
-        //     .post("/user/signup", exampleUser)
-        //     .then((response) => {
-        //         return navigate("/signin");
-        //     })
-        //     .catch((error) => {
-        //         console.error(error);
-        //     });
+        const { data, status } = await UserService.Signup(creds);
+        if (status === 200) {
+            snackBar.openSnackbar({
+                message: `Signup successful, welcome ${data.name}`,
+                severity: 'success'
+            });
+            navigate(`/signin`);
+        }
+        else{
+            snackBar.openSnackbar({
+                message: `Signup failed`,
+                severity:`error`
+            })
+        }
     };
 
     const repeatPasswordValidator = useCallback(
@@ -120,22 +130,22 @@ export const SignUp: React.FC = () => {
                 <DatePicker
                     label="Date of Birth"
                     value={getValues("dateOfBirth")}
-                    onChange={(date) => setValue("dateOfBirth", date??new Date(Date.now()))}
+                    onChange={(date) => setValue("dateOfBirth", date ?? new Date(Date.now()))}
                     className="form-field"
-                    
-                    // className="form-field"
-                    // error={Boolean(errors.dateOfBirth)}
-                    // helperText={errors.dateOfBirth && "Date of birth is required"}
-                    // {...register("dateOfBirth", { required: true })}
 
-                    // renderInput={(startProps, endProps) => (
-                    //     <>
-                    //         <TextField
-                    //             {...startProps}
-                    //             helperText={errors.dateOfBirth && "Date of Birth is required"}
-                    //         />
-                    //     </>
-                    // )}
+                // className="form-field"
+                // error={Boolean(errors.dateOfBirth)}
+                // helperText={errors.dateOfBirth && "Date of birth is required"}
+                // {...register("dateOfBirth", { required: true })}
+
+                // renderInput={(startProps, endProps) => (
+                //     <>
+                //         <TextField
+                //             {...startProps}
+                //             helperText={errors.dateOfBirth && "Date of Birth is required"}
+                //         />
+                //     </>
+                // )}
                 />
 
 

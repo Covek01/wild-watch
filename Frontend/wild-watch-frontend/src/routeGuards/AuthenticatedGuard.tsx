@@ -6,7 +6,7 @@ const AuthenticatedGuard = ({ children }: { children: ReactElement }) => {
   const { isAuthenticated } = useAuthContext();
 
   if (isAuthenticated()) {
-    return <Navigate to="/personal"></Navigate>;
+    return <Navigate to="/"></Navigate>;
   }
 
   return <>{children}</>;
