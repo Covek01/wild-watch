@@ -12,7 +12,7 @@ const Bar: React.FC = () => {
     }
 
     const handleClickMap = () => {
-
+        navigate("/map");
     }
 
     const handleClickSignIn = () => {
