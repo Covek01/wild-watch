@@ -16,6 +16,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import NotAuthenticatedGuard from './routeGuards/NotAuthenticatedGuard';
 import Map from './components/mappage/map';
+import { MapStateProvider } from './contexts/map.context';
 
 function App() {
   return (
@@ -24,24 +25,26 @@ function App() {
         <SnackbarProvider>
           <AuthStateProvider>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <Routes>
-                <Route>
-                  <Route index element={<Navigate to="/speciesinfo" replace />}></Route>
-                  <Route path="/homepage" element={<Homepage />} />
-                  <Route path="/speciesinfo" element={<NotAuthenticatedGuard>{<SpeciesInfo />}</NotAuthenticatedGuard>}></Route>
-                  <Route path="/map" element={<NotAuthenticatedGuard>{<Map />}</NotAuthenticatedGuard>}></Route>
+              <MapStateProvider>
+                <Routes>
+                  <Route>
+                    <Route index element={<Navigate to="/speciesinfo" replace />}></Route>
+                    <Route path="/homepage" element={<Homepage />} />
+                    <Route path="/speciesinfo" element={<NotAuthenticatedGuard>{<SpeciesInfo />}</NotAuthenticatedGuard>}></Route>
+                    <Route path="/map" element={<NotAuthenticatedGuard>{<Map />}</NotAuthenticatedGuard>}></Route>
 
-                  <Route
-                    path="/signin"
-                    element={<AuthenticatedGuard>{<SignIn />}</AuthenticatedGuard>}
-                  ></Route>
+                    <Route
+                      path="/signin"
+                      element={<AuthenticatedGuard>{<SignIn />}</AuthenticatedGuard>}
+                    ></Route>
 
-                  <Route
-                    path="/signup"
-                    element={<AuthenticatedGuard>{<SignUp />}</AuthenticatedGuard>}
-                  ></Route>
-                </Route>
-              </Routes>
+                    <Route
+                      path="/signup"
+                      element={<AuthenticatedGuard>{<SignUp />}</AuthenticatedGuard>}
+                    ></Route>
+                  </Route>
+                </Routes>
+              </MapStateProvider>
             </LocalizationProvider>
           </AuthStateProvider>
         </SnackbarProvider>
