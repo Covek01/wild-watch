@@ -3,7 +3,7 @@ import axios from "axios"
 import { error } from "console"
 
 export const constants = {
-    apiName: `https://localhost:7005`,
+    apiName: `https://localhost:7139`,
 };
   
 const axiosInstance = axios.create({

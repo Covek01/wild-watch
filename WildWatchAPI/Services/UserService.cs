@@ -443,5 +443,39 @@ namespace WildWatchAPI.Services
             }
             return user.Location;
         }
+
+        public async Task SetUserName(string id, string userName)
+        {
+            using var session = await _context.MongoClient.StartSessionAsync();
+            session.StartTransaction();
+            try
+            {
+                var user = Builders<User>.Filter.Where(u => u.Id == id);
+                var update = Builders<User>.Update
+                    .Set(u => u.Name, userName);
+
+                var userSightings = Builders<Sighting>.Filter.Where(u => u.Sighter.Id == new MongoDBRef("Users", id));
+                var userSightingsUpdate = Builders<Sighting>.Update
+                    .Set(s => s.Sighter.Name, userName);
+
+
+                var userHabitat = Builders<Habitat>.Filter
+                    .ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.userId == id));
+                var userHabitatUpdate = Builders<Habitat>.Update
+                    .Set("Sightings.$.Sighter.Name", userName);
+
+
+                var result = await _context.Users.UpdateOneAsync(user, update);
+                var resultSightings = await _context.Sightings.UpdateManyAsync(userSightings, userSightingsUpdate);
+                var resultHabitat = await _context.Habitats.UpdateManyAsync(userHabitat, userHabitatUpdate);
+                int a = 1;
+
+            }
+            catch (Exception)
+            {
+                await session.AbortTransactionAsync();
+                throw new Exception("User service failed");
+            }
+        }
     }
 }

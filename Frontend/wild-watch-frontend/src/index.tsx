@@ -7,6 +7,7 @@ import {
   BrowserRouter,
 
 } from "react-router-dom";
+import theme from './themes/Theme';
 
 
 const root = ReactDOM.createRoot(
