@@ -204,13 +204,13 @@ namespace WildWatchAPI.Services
             {
                 var user = Builders<User>.Filter.Where(u => u.Id == userId);
 
-                var sightings = Builders<Sighting>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId));
+                var sightings = Builders<Sighting>.Filter.Where(s => s.Sighter.userId == userId);
 
-                var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", userId)));
-                var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", userId)));
+                var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.userId ==  userId));
+                var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.userId == userId));
 
-                var habitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId)));
-                var habitatsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId)));
+                var habitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.userId == userId));
+                var habitatsUpdate = Builders<Habitat>.Update.PullFilter(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.userId == userId));
 
 
                 await _context.Users.DeleteOneAsync(session,user);
@@ -326,49 +326,42 @@ namespace WildWatchAPI.Services
 
                 var userSummary = new UserSummary()
                 {
-                    Id = new MongoDBRef("Users", userId),
+                    userId = userId,
                     Email = user.Email,
                     Name = user.Name,
                     NumberOfSightings = userFromDatabase.Sightings.Count()
                 };
 
-                var sightingsFilter = Builders<Sighting>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId));
+                var sightingsFilter = Builders<Sighting>.Filter.Where(s => s.Sighter.userId == userId);
                 var sightingsUpdate = Builders<Sighting>.Update.Set(sig => sig.Sighter, userSummary);
                 await _context.Sightings.UpdateManyAsync(session, sightingsFilter,sightingsUpdate);
 
-                var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", userId)));
+                var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.userId == userId));
                 //var speciesFilter = Builders<Species>.Filter.Empty;
                 var speciesUpdate = Builders<Species>.Update.Set("Sightings.$[s].Sighter", userSummary);
-                //var speciesArrayFilters = new List<ArrayFilterDefinition>
-                //{
-                //    new BsonDocumentArrayFilterDefinition<BsonDocument>(
-                //        new BsonDocument("s.Sighter._id",new BsonDocument
-                //        {
-                //            new MongoDBRef("Users",userId)
-                //        } ))
-                //};
                 var speciesArrayFilters = new List<ArrayFilterDefinition>
                 {
                     new BsonDocumentArrayFilterDefinition<BsonDocument>(
-                       new BsonDocument("s.Sighter.$id", new BsonDocument("$eq",userId)))
+                        new BsonDocument("s.Sighter.userId",userId))
                 };
+                //var speciesArrayFilters = new List<ArrayFilterDefinition>
+                //{
+                //    new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                //       new BsonDocument("s.Sighter.$id", new BsonDocument("$eq",userId)))
+                //};
                 var speciesUpdateOptions = new UpdateOptions { ArrayFilters = speciesArrayFilters };
                 await _context.Species.UpdateManyAsync(session, speciesFilter, speciesUpdate,speciesUpdateOptions);
 
 
-                var habitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId)));
+                var habitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.userId == userId));
                 //var habitatsFilter = Builders<Habitat>.Filter.Empty;
                 var habitatsUpdate = Builders<Habitat>.Update.Set("Sightings.$[s].Sighter", userSummary);
-                //var habitatArrayFilters = new List<ArrayFilterDefinition>
-                //{
-                //    new BsonDocumentArrayFilterDefinition<BsonDocument>(
-                //        new BsonDocument("s.Sighter._id",userId))
-                //};
                 var habitatArrayFilters = new List<ArrayFilterDefinition>
                 {
                     new BsonDocumentArrayFilterDefinition<BsonDocument>(
-                        new BsonDocument("s.Sighter.$id",new BsonDocument("$eq",new BsonObjectId(userId))))
+                        new BsonDocument("s.Sighter.userId",userId))
                 };
+
                 var habitatUpdateOptions = new UpdateOptions { ArrayFilters = habitatArrayFilters };
                 await _context.Habitats.UpdateManyAsync(session, habitatsFilter, habitatsUpdate,habitatUpdateOptions);
 

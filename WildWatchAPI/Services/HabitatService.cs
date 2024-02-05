@@ -44,73 +44,73 @@ namespace WildWatchAPI.Services
             _context.Habitats.Indexes.CreateOne(indexModel);
         }
 
-        private bool CloserThanMeters(GeoJsonPoint<GeoJson2DGeographicCoordinates> p, List<GeoJsonPoint<GeoJson2DGeographicCoordinates>> pointsList)
-        {
-            var maxDistance = double.Parse(_configuration.GetSection("MaxDistanceHabitatMeters").Value??"0");
-            foreach (var point in pointsList)
-            {
-                var distance = Math.Sqrt(Math.Pow((point.Coordinates.Latitude - p.Coordinates.Latitude), 2) + Math.Pow((point.Coordinates.Longitude - p.Coordinates.Longitude), 2))*111111;
+        //private bool CloserThanMeters(GeoJsonPoint<GeoJson2DGeographicCoordinates> p, List<GeoJsonPoint<GeoJson2DGeographicCoordinates>> pointsList)
+        //{
+        //    var maxDistance = double.Parse(_configuration.GetSection("MaxDistanceHabitatMeters").Value??"0");
+        //    foreach (var point in pointsList)
+        //    {
+        //        var distance = Math.Sqrt(Math.Pow((point.Coordinates.Latitude - p.Coordinates.Latitude), 2) + Math.Pow((point.Coordinates.Longitude - p.Coordinates.Longitude), 2))*111111;
 
-                if (distance < maxDistance) return true;
-            }
-            return false;
-        }
+        //        if (distance < maxDistance) return true;
+        //    }
+        //    return false;
+        //}
         
-        private double CalculateDistance(GeoJsonPoint<GeoJson2DGeographicCoordinates> p1, GeoJsonPoint<GeoJson2DGeographicCoordinates> p2)
-        {
-            return Math.Sqrt(Math.Pow((p1.Coordinates.Latitude - p1.Coordinates.Latitude), 2) + Math.Pow((p2.Coordinates.Longitude - p2.Coordinates.Longitude), 2)) * 111111;
-        }
-        public async Task ConsolidateAsync(string habitatId)
-        {
-            var habitat = await _context.Habitats.Find(h => h.Id == habitatId).FirstOrDefaultAsync();
-            if (habitat == default)
-            {
-                throw new Exception("Invalid Id");
-            }
-            var maxDistance = double.Parse(_configuration.GetSection("MaxDistanceHabitatMeters").Value ?? "0");
+        //private double CalculateDistance(GeoJsonPoint<GeoJson2DGeographicCoordinates> p1, GeoJsonPoint<GeoJson2DGeographicCoordinates> p2)
+        //{
+        //    return Math.Sqrt(Math.Pow((p1.Coordinates.Latitude - p1.Coordinates.Latitude), 2) + Math.Pow((p2.Coordinates.Longitude - p2.Coordinates.Longitude), 2)) * 111111;
+        //}
+        //public async Task ConsolidateAsync(string habitatId)
+        //{
+        //    var habitat = await _context.Habitats.Find(h => h.Id == habitatId).FirstOrDefaultAsync();
+        //    if (habitat == default)
+        //    {
+        //        throw new Exception("Invalid Id");
+        //    }
+        //    var maxDistance = double.Parse(_configuration.GetSection("MaxDistanceHabitatMeters").Value ?? "0");
 
-            using var session = await _context.MongoClient.StartSessionAsync();
-            session.StartTransaction();
-            try
-            {
-                int numOfConsolidation = 0;
-                do
-                {
-                    numOfConsolidation = 0;
+        //    using var session = await _context.MongoClient.StartSessionAsync();
+        //    session.StartTransaction();
+        //    try
+        //    {
+        //        int numOfConsolidation = 0;
+        //        do
+        //        {
+        //            numOfConsolidation = 0;
 
-                    //var nearHabitats = await _context.Habitats.Find(h => h.BorderPoints.Any(p => CloserThanMeters(p, habitat.BorderPoints))).ToListAsync();
-                    //var nearHabitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.BorderPoints, Builders<GeoJsonPoint<GeoJson2DGeographicCoordinates>>.Filter.Where(p => CloserThanMeters(p, habitat.BorderPoints)));
-                    var nearHabitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s=>s.Location.Coordinates.Longitude==45));
+        //            //var nearHabitats = await _context.Habitats.Find(h => h.BorderPoints.Any(p => CloserThanMeters(p, habitat.BorderPoints))).ToListAsync();
+        //            //var nearHabitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.BorderPoints, Builders<GeoJsonPoint<GeoJson2DGeographicCoordinates>>.Filter.Where(p => CloserThanMeters(p, habitat.BorderPoints)));
+        //            var nearHabitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s=>s.Location.Coordinates.Longitude==45));
 
-                    var nearHabitats = await _context.Habitats.Find(session,nearHabitatsFilter).ToListAsync();
-
-
+        //            var nearHabitats = await _context.Habitats.Find(session,nearHabitatsFilter).ToListAsync();
 
 
 
-                    numOfConsolidation = nearHabitats.Count;
 
-                    nearHabitats.ForEach(async h => {
-                        habitat.Sightings.AddRange(h.Sightings);
-                        await DeleteAsync(h.Id);
-                    });
 
-                } while (numOfConsolidation > 0);
+        //            numOfConsolidation = nearHabitats.Count;
 
-                await UpdateAsync(habitatId,
-                    new HabitatDto()
-                    {
-                        Sightings=habitat.Sightings
-                    }
-                 );
+        //            nearHabitats.ForEach(async h => {
+        //                habitat.Sightings.AddRange(h.Sightings);
+        //                await DeleteAsync(h.Id);
+        //            });
 
-                await session.CommitTransactionAsync();
-            }
-            catch(Exception ) 
-            {
-                await session.AbortTransactionAsync();
-            }
-        }
+        //        } while (numOfConsolidation > 0);
+
+        //        await UpdateAsync(habitatId,
+        //            new HabitatDto()
+        //            {
+        //                Sightings=habitat.Sightings
+        //            }
+        //         );
+
+        //        await session.CommitTransactionAsync();
+        //    }
+        //    catch(Exception ) 
+        //    {
+        //        await session.AbortTransactionAsync();
+        //    }
+        //}
         public async Task<string> CreateAsync(IClientSessionHandle session,HabitatDto h)
         {
             try
@@ -138,10 +138,10 @@ namespace WildWatchAPI.Services
 
                 HabitatSummary habitatSummary = new HabitatSummary()
                 {
-                    Id = new MongoDBRef("Habitats", habitat.Id)
+                    habitatId = habitat.Id
                 };
 
-                var speciesToUpdate = h.Sightings.Select(s => s.Species.Id.Id.ToString()).ToList();
+                var speciesToUpdate = h.Sightings.Select(s => s.Species.speciesId).ToList();
                 var speciesFilter = Builders<Species>.Filter.In(s => s.Id, speciesToUpdate);
                 var speciesUpdate = Builders<Species>.Update.Push(s => s.Habitats, habitatSummary);
                 await _context.Species.UpdateManyAsync(session, speciesFilter, speciesUpdate);
@@ -198,8 +198,8 @@ namespace WildWatchAPI.Services
         {
             var habitat = Builders<Habitat>.Filter.Where(h => h.Id == habitatId);
 
-            var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", habitatId)));
-            var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", habitatId)));
+            var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.habitatId == habitatId));
+            var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.habitatId == habitatId));
 
             await _context.Habitats.DeleteOneAsync(session, habitat);
             await _context.Species.UpdateManyAsync(session, speciesFilter, speciesUpdate);
@@ -213,8 +213,8 @@ namespace WildWatchAPI.Services
             {
                 var habitat = Builders<Habitat>.Filter.Where(h => h.Id == habitatId);
 
-                var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", habitatId)));
-                var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", habitatId)));
+                var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.habitatId == habitatId));
+                var speciesUpdate = Builders<Species>.Update.PullFilter(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.habitatId == habitatId));
 
                 await _context.Habitats.DeleteOneAsync(session, habitat);
                 await _context.Species.UpdateManyAsync(session, speciesFilter, speciesUpdate);
@@ -261,16 +261,16 @@ namespace WildWatchAPI.Services
 
                 HabitatSummary habitatSummary = new HabitatSummary()
                 {
-                    Id = new MongoDBRef("Habitats", habitatId),
+                    habitatId = habitatId,
                 };
 
-                var speciesToRemoveUpdate = oldHabitat.Sightings.Select(s => s.Species.Id.Id.ToString()).ToList();
+                var speciesToRemoveUpdate = oldHabitat.Sightings.Select(s => s.Species.speciesId).ToList();
                 //var speciesRemoveFilter = Builders<Species>.Filter.ElemMatch(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", habitatId)));
                 var speciesRemoveFilter = Builders<Species>.Filter.In(s => s.Id, speciesToRemoveUpdate);
-                var speciesRemoveUpdate = Builders<Species>.Update.PullFilter(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.Id == new MongoDBRef("Habitats", habitatId)));
+                var speciesRemoveUpdate = Builders<Species>.Update.PullFilter(s => s.Habitats, Builders<HabitatSummary>.Filter.Where(h => h.habitatId == habitatId));
                 await _context.Species.UpdateManyAsync(speciesRemoveFilter, speciesRemoveUpdate);
 
-                var speciesToAddUpdate = h.Sightings.Select(s => s.Species.Id.Id.ToString()).ToList();
+                var speciesToAddUpdate = h.Sightings.Select(s => s.Species.speciesId).ToList();
                 var speciesAddFilter = Builders<Species>.Filter.In(s => s.Id, speciesToAddUpdate);
                 var speciesAddUpdate = Builders<Species>.Update.Push(s => s.Habitats, habitatSummary);
                 await _context.Species.UpdateManyAsync(speciesAddFilter, speciesAddUpdate);
