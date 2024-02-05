@@ -337,12 +337,40 @@ namespace WildWatchAPI.Services
                 await _context.Sightings.UpdateManyAsync(session, sightingsFilter,sightingsUpdate);
 
                 var speciesFilter = Builders<Species>.Filter.ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(si => si.Sighter.Id == new MongoDBRef("Users", userId)));
-                var speciesUpdate = Builders<Species>.Update.Set("Sightings.$.Sighter", userSummary);
-                await _context.Species.UpdateManyAsync(session, speciesFilter, speciesUpdate);
+                //var speciesFilter = Builders<Species>.Filter.Empty;
+                var speciesUpdate = Builders<Species>.Update.Set("Sightings.$[s].Sighter", userSummary);
+                //var speciesArrayFilters = new List<ArrayFilterDefinition>
+                //{
+                //    new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                //        new BsonDocument("s.Sighter._id",new BsonDocument
+                //        {
+                //            new MongoDBRef("Users",userId)
+                //        } ))
+                //};
+                var speciesArrayFilters = new List<ArrayFilterDefinition>
+                {
+                    new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                       new BsonDocument("s.Sighter.$id", new BsonDocument("$eq",userId)))
+                };
+                var speciesUpdateOptions = new UpdateOptions { ArrayFilters = speciesArrayFilters };
+                await _context.Species.UpdateManyAsync(session, speciesFilter, speciesUpdate,speciesUpdateOptions);
+
 
                 var habitatsFilter = Builders<Habitat>.Filter.ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.Id == new MongoDBRef("Users", userId)));
-                var habitatsUpdate = Builders<Habitat>.Update.Set("Sightings.$.Sighter", userSummary);
-                await _context.Habitats.UpdateManyAsync(session, habitatsFilter, habitatsUpdate);
+                //var habitatsFilter = Builders<Habitat>.Filter.Empty;
+                var habitatsUpdate = Builders<Habitat>.Update.Set("Sightings.$[s].Sighter", userSummary);
+                //var habitatArrayFilters = new List<ArrayFilterDefinition>
+                //{
+                //    new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                //        new BsonDocument("s.Sighter._id",userId))
+                //};
+                var habitatArrayFilters = new List<ArrayFilterDefinition>
+                {
+                    new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                        new BsonDocument("s.Sighter.$id",new BsonDocument("$eq",new BsonObjectId(userId))))
+                };
+                var habitatUpdateOptions = new UpdateOptions { ArrayFilters = habitatArrayFilters };
+                await _context.Habitats.UpdateManyAsync(session, habitatsFilter, habitatsUpdate,habitatUpdateOptions);
 
                 await session.CommitTransactionAsync();
                 return userFromDatabase;

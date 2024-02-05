@@ -7,7 +7,7 @@ import {
   BrowserRouter,
 
 } from "react-router-dom";
-
+import 'leaflet/dist/leaflet.css'
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

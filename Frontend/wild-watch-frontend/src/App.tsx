@@ -15,6 +15,7 @@ import { SnackbarProvider } from './contexts/snackbar.context';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import NotAuthenticatedGuard from './routeGuards/NotAuthenticatedGuard';
+import Map from './components/mappage/map';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
                   <Route index element={<Navigate to="/speciesinfo" replace />}></Route>
                   <Route path="/homepage" element={<Homepage />} />
                   <Route path="/speciesinfo" element={<NotAuthenticatedGuard>{<SpeciesInfo />}</NotAuthenticatedGuard>}></Route>
+                  <Route path="/map" element={<NotAuthenticatedGuard>{<Map />}</NotAuthenticatedGuard>}></Route>
 
                   <Route
                     path="/signin"
