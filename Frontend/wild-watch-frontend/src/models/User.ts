@@ -1,5 +1,5 @@
-import { Point } from "geojson"
 import { SightingSummaryUser } from "./Sighting"
+import { LocationI } from "../types/location"
 export class UserSummary{
     id:string
     name:string
@@ -25,7 +25,7 @@ export class User{
     email:string
     imageUrl:string
     dateOfBirth:Date
-    location:Point
+    location:LocationI
     sightings:SightingSummaryUser[]
     favouriteSpecies:string[]
 
@@ -35,7 +35,7 @@ export class User{
         email:string,
         imageUrl:string,
         dateOfBrith:Date,
-        location:Point,
+        location:LocationI,
         sightings:SightingSummaryUser[],
         favouriteSpecies:string[]
     ){

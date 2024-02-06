@@ -1,18 +1,18 @@
-import { Point } from "geojson"
 import {SpeciesSummary} from "./Species"
 import { UserSummary } from "./User"
+import { LocationI } from "../types/location"
 
 
 export class SightingSummaryUser{
     id:string
     sightingTime:Date
-    location:Point
+    location:LocationI
     species:SpeciesSummary
     imageUrl:string
     constructor(
         id:string,
         sightingTime:Date,
-        location:Point,
+        location:LocationI,
         species:SpeciesSummary,
         imageUrl:string
     ){
@@ -27,13 +27,13 @@ export class SightingSummaryUser{
 export class SightingSummarySpecies{
     id:string
     sightingTime:Date
-    location:Point
+    location:LocationI
     sighter:UserSummary
 
     constructor(
         id:string,
         sightingTime:Date,
-        location:Point,
+        location:LocationI,
         sighter:UserSummary
     ){
         this.id=id;
@@ -46,14 +46,14 @@ export class SightingSummarySpecies{
 export class SightingSummaryHabitat{
     id:string
     sightingTime:Date
-    location:Point
+    location:LocationI
     sighter:UserSummary
     species:SpeciesSummary
 
     constructor(
         id:string,
         sightingTime:Date,
-        location:Point,
+        location:LocationI,
         sighter:UserSummary,
         species:SpeciesSummary
     ){
@@ -68,14 +68,14 @@ export class SightingSummaryHabitat{
 export class Sighting{
     id:string
     sightingTime:Date
-    location:Point
+    location:LocationI
     sighter:UserSummary
     species:SpeciesSummary
     imageUrl:string
     constructor(
         id:string,
         sightingTime:Date,
-        location:Point,
+        location:LocationI,
         sighter:UserSummary,
         species:SpeciesSummary,
         imageUrl:string
