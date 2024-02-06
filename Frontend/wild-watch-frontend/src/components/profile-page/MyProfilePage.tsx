@@ -8,26 +8,31 @@ import {Stack, Avatar, Typography, ThemeProvider, Paper} from "@mui/material"
 import UserService from '../../services/UserService'
 import theme from '../../themes/Theme'
 import NameField from './NameField'
+import { useAuthContext } from '../../contexts/auth.context'
+import SightingsContainer from './SightingsContainer'
+import { Sighting } from '../../models/Sighting'
 
 
 const MyProfilePage:React.FC = () => {
-   //const { isAuthenticated, signout, user } = useAuthContext();
-    const [user, setUser] = useState<User | null>(null)
+    const { isAuthenticated, signout, user } = useAuthContext();
+    //const [user, setUser] = useState<User | null>(null)
     const [userNameField, setUserNameField] = useState<string>("")
-    const id = '65bd3ac5272027bd7218c6ae'
 
-    const setInitialUserInfo = async () => {
-        const userInfo = await UserService.GetSpeciesInfo(id)
-        setUser(userInfo)
-        setUserNameField(userInfo?.name ?? "")
-    }
+    // const setInitialUserInfo = async () => {
+    //     const userInfo = await UserService.GetUserInfo(id)
+    //     setUser(userInfo)
+    //     setUserNameField(userInfo?.name ?? "")
+    // }
 
     const setUserName = (name: string) => {
-        
+        setUserNameField(name)
     }
 
     useEffect(() => {
-        setInitialUserInfo()
+        setTimeout( () =>{
+            console.log(user)
+        }, 1000)
+        //setInitialUserInfo()
     }, [])
 
     return (
@@ -50,7 +55,7 @@ const MyProfilePage:React.FC = () => {
                     />
                     <Stack direction="column" spacing={2}
                         style={{width: '60%', alignSelf: 'center'}}>
-                        <NameField text={userNameField} setName={setUserName}/>
+                        <NameField text={userNameField} setName={setUserName} user={user}/>
                         <Typography style={{ fontSize: '20px',color: theme.palette.primary.contrastText, marginRight: '5%', marginLeft: '15%' }} variant="body2" component="div">
                             {`Contact : ${user?.email}`}
                         </Typography>
@@ -65,6 +70,7 @@ const MyProfilePage:React.FC = () => {
                     </Stack>
                     </Stack>
                 </Paper>
+                <SightingsContainer />
             </ThemeProvider>
         </>
     )

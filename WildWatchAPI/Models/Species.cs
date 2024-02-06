@@ -7,7 +7,7 @@ namespace WildWatchAPI.Models
 {
     public class SpeciesSummary
     {
-        public MongoDBRef Id { get; set; } = null!;
+        public string speciesId { get; set; } = null!;
         [JsonConverter(typeof(JsonStringEnumConverter))]
         [BsonRepresentation(BsonType.String)]
         public Klasa Class { get; set; }
@@ -31,10 +31,10 @@ namespace WildWatchAPI.Models
         public string Description { get; set; }= null!;
         public string ConservationStatus { get; set; }= null!;
 
-        [JsonIgnore]
+        //[JsonIgnore]
         public List<SightingSummarySpecies> Sightings { get; set; } = new();
 
-        [JsonIgnore]
+        //[JsonIgnore]
         public List<HabitatSummary> Habitats { get; set; } = new();
 
 

@@ -7,6 +7,7 @@ import {
   BrowserRouter,
 
 } from "react-router-dom";
+import 'leaflet/dist/leaflet.css'
 import theme from './themes/Theme';
 
 

@@ -8,7 +8,7 @@ namespace WildWatchAPI.Models
 {
     public class SightingSummaryUser
     {
-        public MongoDBRef Id { get; set; } = null!;
+        public string sightingId { get; set; } = null!;
         public DateTime SightingTime { get; set; }
         public GeoJson2DGeographicCoordinates Location { get; set; } = null!;
         public SpeciesSummary Species { get; set; }=null!;
@@ -16,7 +16,7 @@ namespace WildWatchAPI.Models
 
     public class SightingSummarySpecies
     {
-        public MongoDBRef Id { get; set; } = null!;
+        public string sightingId { get; set; } = null!;
         public DateTime SightingTime { get; set; }
         public GeoJson2DGeographicCoordinates Location { get; set; } = null!;
 
@@ -25,7 +25,7 @@ namespace WildWatchAPI.Models
 
     public class SightingSummaryHabitat
     {
-        public MongoDBRef Id { get; set; } = null!;
+        public string sightingId { get; set; } = null!;
         public DateTime SightingTime { get; set; }
         public GeoJsonPoint<GeoJson2DGeographicCoordinates> Location { get; set; } = null!;
         public SpeciesSummary Species { get; set; } = null!;
@@ -42,10 +42,10 @@ namespace WildWatchAPI.Models
 
 
         public GeoJson2DGeographicCoordinates Location { get; set; } = null!;
-        [JsonIgnore]
+        //[JsonIgnore]
         public UserSummary Sighter { get; set; } = null!;
 
-        [JsonIgnore]
+        //[JsonIgnore]
         public SpeciesSummary Species { get; set; } = null!;
         public string? ImageUrl { get; set; }
 

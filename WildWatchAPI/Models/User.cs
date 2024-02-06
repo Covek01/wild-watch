@@ -8,7 +8,7 @@ namespace WildWatchAPI.Models
 {
     public class UserSummary
     {
-        public MongoDBRef Id { get; set; } = null!;
+        public string  userId { get; set; } = null!;
         public string Name { get; set; } = null!;
         public string Email { get; set; } = null!;
         public int NumberOfSightings { get; set; }
@@ -34,9 +34,9 @@ namespace WildWatchAPI.Models
         public string ImageUrl { get; set; }= null!;
         public DateTime DateOfBirth { get; set; }
         public GeoJson2DGeographicCoordinates? Location { get; set; }
-        [JsonIgnore]
+        //[JsonIgnore]
         public List<SightingSummaryUser> Sightings { get; set; } = new();
-        [JsonIgnore]
+        //[JsonIgnore]
         public List<MongoDBRef> FavouriteSpecies { get; set; } = new();
     }
 

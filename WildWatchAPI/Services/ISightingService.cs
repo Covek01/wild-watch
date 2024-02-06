@@ -12,5 +12,6 @@ namespace WildWatchAPI.Services
         public Task DeleteAsync(string sightingId);
 
         public Task<Sighting> UpdateAsync(string sightingsId, SightingDto s);
+        public Task<List<Sighting>> GetSightingsBySighter(string sighterId);
     }
 }

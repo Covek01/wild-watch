@@ -11,12 +11,14 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 
 interface props{
     text:string,
-    setName: (text: string) => void
+    setName: (text: string) => void,
+    user: User | null
 }
 
-const NameField: React.FC<props> = ({text, setName}) => {
+const NameField: React.FC<props> = ({text, setName, user}) => {
     const [dialogOpen, setDialogOpen] = useState<boolean>(false)
     const [textName, setTextName] = useState<string>("")
+    const [showTextName, setShowTextName] = useState<string>("")
 
     const handleOpen = () => {
         setTextName("")
@@ -27,10 +29,31 @@ const NameField: React.FC<props> = ({text, setName}) => {
         setDialogOpen(false)
     }
 
-    const updateUsername = () => {
+    const setNameInLocalStorage = (name: string) => {
+        const oldUser = JSON.parse(localStorage.getItem('user') ?? "")
+        oldUser.name = textName
+        localStorage.setItem('user', JSON.stringify(oldUser));
+    }
 
+    const updateUsername = async () => {
+        if (user === null){
+            return
+        }
+        const isOkay = await UserService.UpdateUserName(user.id, textName)
+        if (isOkay){
+            setNameInLocalStorage(textName)
+            setName(textName)
+            setShowTextName(textName)
+            user.name = textName
+        }
+        
         handleClose()
     }
+
+
+    useEffect(() =>{
+        setShowTextName(user?.name ?? "")
+    }, [user])
 
 
     return(
@@ -38,9 +61,10 @@ const NameField: React.FC<props> = ({text, setName}) => {
             <ThemeProvider theme={theme}>
                 <Stack direction="row" spacing={1}>
                     <Typography style={{ fontSize: '30px',color: theme.palette.primary.contrastText, marginRight: '5%', marginLeft: '15%' }} variant="body2" component="div">
-                        {text}
+                        {showTextName}
                     </Typography>
                     <IconButton
+                        style={{borderRadius: '2px'}}
                         onClick={async e => {
                             handleOpen()
                         }}>
@@ -49,14 +73,13 @@ const NameField: React.FC<props> = ({text, setName}) => {
                 </Stack>
             </ThemeProvider>
             <Dialog open={dialogOpen} 
-                fullWidth >
+                fullWidth>
                 <DialogTitle>Set new name for user</DialogTitle>
                 <DialogContent>
 
                 </DialogContent>
                 <TextField variant='outlined' label='Name' onChange={async e => {
                     setTextName(e.target.value)
-                    console.log("VALUE FOR TEXTNAME IS" + textName)
                 }}></TextField>
                 <DialogActions>
                     <Button

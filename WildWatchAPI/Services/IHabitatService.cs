@@ -12,6 +12,6 @@ namespace WildWatchAPI.Services
         public Task<Habitat> UpdateAsync(string habitatId, HabitatDto h);
         public Task DeleteAsync(string habitatId);
         public Task SessionDeleteAsync(IClientSessionHandle session, string habitatId);
-        public Task ConsolidateAsync(string habitatId); 
+        //public Task ConsolidateAsync(string habitatId); 
     }
 }

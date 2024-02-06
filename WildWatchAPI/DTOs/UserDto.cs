@@ -14,7 +14,7 @@ namespace WildWatchAPI.DTOs
         public DateTime DateOfBirth { get; set; }
         public GeoJson2DGeographicCoordinates? Location { get; set; }
         public string AccessToken { get; set; }=null!;
-
+        public List<SightingSummaryUser> Sightings { get; set; } = new();
         public UserDto(User u,string token)
         {
             this.Id = u.Id;
@@ -25,6 +25,7 @@ namespace WildWatchAPI.DTOs
             this.DateOfBirth = u.DateOfBirth;
             this.Location = u.Location;
             this.AccessToken = token;
+            this.Sightings = u.Sightings;
         }
 
     }
