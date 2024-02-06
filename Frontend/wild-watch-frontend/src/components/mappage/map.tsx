@@ -18,8 +18,10 @@ const Map: React.FC = () => {
     let defaultZoom = 13
 
     const { setSightings, setHabitats, sightings, habitats } = useMapContext();
-    //sad se kao ucita mapa
-    const position = { lat: 45, lng: 20.5 }
+    if(habitats.length===0 && sightings.length===0){
+        
+    }
+
     return (
         <div className='w-screen h-screen'>
             <Bar />
@@ -28,11 +30,11 @@ const Map: React.FC = () => {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-                <Marker position={position}>
+                {/* <Marker position={position}>
                     <Popup>
                         A pretty CSS3 popup. <br /> Easily customizable.
                     </Popup>
-                </Marker>
+                </Marker> */}
             </MapContainer>
         </div>
     )

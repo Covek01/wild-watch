@@ -11,6 +11,7 @@ namespace WildWatchAPI.Models
         public string sightingId { get; set; } = null!;
         public DateTime SightingTime { get; set; }
         public GeoJson2DGeographicCoordinates Location { get; set; } = null!;
+        public string? ImageUrl { get; set; }
         public SpeciesSummary Species { get; set; }=null!;
     }
 

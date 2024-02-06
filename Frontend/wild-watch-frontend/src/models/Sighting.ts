@@ -8,17 +8,19 @@ export class SightingSummaryUser{
     sightingTime:Date
     location:Point
     species:SpeciesSummary
-
+    imageUrl:string
     constructor(
         id:string,
         sightingTime:Date,
         location:Point,
-        species:SpeciesSummary
+        species:SpeciesSummary,
+        imageUrl:string
     ){
         this.id=id;
         this.sightingTime=sightingTime;
         this.location=location;
         this.species=species;
+        this.imageUrl=imageUrl;
     }
 }
 
