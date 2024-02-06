@@ -91,7 +91,8 @@ namespace WildWatchAPI.Services
                     sightingId=  sighting.Id,
                     Location = s.Location,
                     SightingTime = s.SightingTime,
-                    Species = speciesSummary
+                    Species = speciesSummary,
+                    ImageUrl= s.PhotoUrl ?? ""
                 };
                 var userFilter = Builders<User>.Filter.Where(u => u.Id == user.Id);
                 var userUpdate = Builders<User>.Update.Push(u => u.Sightings, sightingSummaryUser);
@@ -255,7 +256,7 @@ namespace WildWatchAPI.Services
                 //};
                 //await _context.Sightings.ReplaceOneAsync(session,sightingsId, sighting);
                 var sightingFilter = Builders<Sighting>.Filter.Where(sig=>sig.Id==sightingsId);
-                var sightingOld=await _context.Sightings.Find(sightingFilter).FirstOrDefaultAsync();
+                var sightingOld=await _context.Sightings.Find(session,sightingFilter).FirstOrDefaultAsync();
                 var sightingUpdate = Builders<Sighting>.Update
                     .Set(s => s.SightingTime, s.SightingTime)
                     .Set(s => s.Location, s.Location)
@@ -269,7 +270,8 @@ namespace WildWatchAPI.Services
                     sightingId = sightingsId,
                     Location = s.Location,
                     SightingTime = s.SightingTime,
-                    Species = speciesSummary
+                    Species = speciesSummary,
+                    ImageUrl= s.PhotoUrl ?? ""
                 };
                 var sightingSummaryHabitat = new SightingSummaryHabitat()
                 {
@@ -334,7 +336,7 @@ namespace WildWatchAPI.Services
                 }
 
 
-                var sighting = await _context.Sightings.Find(sig => sig.Id == sightingsId).FirstOrDefaultAsync();
+                var sighting = await _context.Sightings.Find(session,sig => sig.Id == sightingsId).FirstOrDefaultAsync();
                 await session.CommitTransactionAsync();
                 return sighting;
             }

@@ -43,7 +43,18 @@ namespace WildWatchAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        [HttpGet("readMinSize/{size}")]
+        public async Task<ActionResult> GetWithNumberOfSightings([FromRoute] int size)
+        {
+            try
+            {
+                return Ok(await this._habitatService.GetWithNumberOfSightings(size));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         [HttpPut("update")]
         public async Task<ActionResult> UpdateHabitat([FromBody] HabitatDto h, [FromQuery] string habitatId)
         {
