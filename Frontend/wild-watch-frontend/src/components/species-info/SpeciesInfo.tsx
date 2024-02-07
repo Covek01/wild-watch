@@ -8,10 +8,27 @@ import theme from '../../themes/Theme'
 import { useAuthContext } from '../../contexts/auth.context'
 import { Sighting } from '../../models/Sighting'
 import NameLabel from './NameLabel'
+import ClassLabel from './ClassLabel'
+import { Species } from '../../models/Species'
+import {useParams} from 'react-router-dom'
+import SpeciesService from '../../services/SpeciesService'
 
 const SpeciesInfo: React.FC = () => {
     const { isAuthenticated, signout, user } = useAuthContext();
-    const id = '65bd3e793867af7cce872dd7'
+    const [species, setSpecies] = useState<Species | null>(null)
+    const [speciesIdState, setSpeciesIdState] = useState<string>('-1')
+    const params = useParams()
+    const speciesId = params.id
+
+    const initializeSpecies = async () => {
+        const data = await SpeciesService.GetSpeciesInfo(speciesId ?? '-1')
+        if (data){
+            setSpecies(data)
+        }
+    }
+    useEffect(() => {
+        initializeSpecies()
+    }, [])
 
     return(
         <>
@@ -27,23 +44,24 @@ const SpeciesInfo: React.FC = () => {
                     <Avatar
                         style={{marginTop: '2%', marginBottom:'2%', marginLeft:'2%'}}
                         alt="NO PICTURE"
-                        src={user?.imageUrl}
+                        src={species?.imageUrl}
                         sx={{ width: 200, height: 200 }}
                         variant="square"
                     />
                     <Stack direction="column" spacing={2}
                         style={{width: '60%', alignSelf: 'center'}}>
-                        <NameLabel name='zivotinja' />
+                        <NameLabel name={species?.commonName ?? ""} />
+                        <ClassLabel name={species?.classAnimal?.toString() ?? ""} />
                         <Typography
                             style={{ color: theme.palette.primary.contrastText, marginRight: '5%', marginLeft: '15%' }}
                             variant="body2" component="div">
-                            {`Latin name : ${user?.email}`}
+                            {`Latin name : ${species?.scientificName}`}
                         </Typography>
                         <Typography
                         style={{ fontSize: '16px', color: theme.palette.primary.contrastText, marginRight: '5%', marginLeft: '15%' }}
                         variant="body2"
                         component="div">
-                             {`Seen ${14} times`}
+                             {`Seen ${species?.sightings.length} times`}
                         </Typography>
                     </Stack>
                     </Stack>

@@ -32,7 +32,7 @@ function App() {
                     <Route index element={<Navigate to="/map" replace />}></Route>
                     <Route path="/homepage" element={<Homepage />} />
                     <Route path="/myprofile" element={<NotAuthenticatedGuard>{<MyProfilePage />}</NotAuthenticatedGuard>}></Route>
-                    <Route path="/speciesinfo" element={<NotAuthenticatedGuard>{<SpeciesInfo />}</NotAuthenticatedGuard>}></Route>
+                    <Route path="/speciesinfo/:id" element={<NotAuthenticatedGuard>{<SpeciesInfo />}</NotAuthenticatedGuard>}></Route>
                     <Route path="/map" element={<NotAuthenticatedGuard>{<Map />}</NotAuthenticatedGuard>}></Route>
 
                     <Route

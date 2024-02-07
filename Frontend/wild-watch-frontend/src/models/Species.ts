@@ -2,7 +2,7 @@ import { HabitatSummary } from "./Habitat"
 import { SightingSummarySpecies } from "./Sighting"
 
 export class SpeciesSummary {
-    id: string
+    speciesId: string
     classAnimal: Klasa
     commonName: string
     scientificName: string
@@ -19,7 +19,7 @@ export class SpeciesSummary {
         description: string,
         conservationStatus: string
     ) {
-        this.id = id;
+        this.speciesId = id;
         this.classAnimal = classAnimal;
         this.commonName = commonName;
         this.scientificName = scientificName;

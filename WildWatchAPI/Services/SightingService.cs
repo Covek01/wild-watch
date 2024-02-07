@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
+using System.Security.Claims;
 using WildWatchAPI.Context;
 using WildWatchAPI.DTOs;
 using WildWatchAPI.Models;
@@ -364,5 +365,6 @@ namespace WildWatchAPI.Services
                 throw new Exception("User service failed");
             }
         }
+
     }
 }

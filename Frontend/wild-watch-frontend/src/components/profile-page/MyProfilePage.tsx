@@ -4,13 +4,15 @@ import Bar from '../crucials/Bar'
 import Map from '../homepage/Map'
 import { Box } from '@mui/material'
 import {User} from '../../models/User'
-import {Stack, Avatar, Typography, ThemeProvider, Paper} from "@mui/material"
+import {Stack, Avatar, Typography, ThemeProvider, Paper, Icon, SvgIcon} from "@mui/material"
 import UserService from '../../services/UserService'
 import theme from '../../themes/Theme'
 import NameField from './NameField'
 import { useAuthContext } from '../../contexts/auth.context'
 import SightingsContainer from './SightingsContainer'
 import { Sighting } from '../../models/Sighting'
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import ForestIcon from '@mui/icons-material/Forest';
 
 
 const MyProfilePage:React.FC = () => {
@@ -42,7 +44,7 @@ const MyProfilePage:React.FC = () => {
                 <Paper
                     elevation={4}
                     variant="outlined"
-                    style={{width: '60%', backgroundColor: theme.palette.secondary.dark,
+                    sx={{width: '60%', backgroundColor: theme.palette.secondary.dark,
                      marginLeft: 'auto', marginRight:'auto', marginTop: '1%',
                      }}>
                     <Stack direction="row" spacing={1} justifyContent="space-between">
@@ -54,7 +56,7 @@ const MyProfilePage:React.FC = () => {
                         variant="square"
                     />
                     <Stack direction="column" spacing={2}
-                        style={{width: '60%', alignSelf: 'center'}}>
+                        sx={{width: '60%', alignSelf: 'center'}}>
                         <NameField text={userNameField} setName={setUserName} user={user}/>
                         <Typography style={{ fontSize: '20px',color: theme.palette.primary.contrastText, marginRight: '5%', marginLeft: '15%' }} variant="body2" component="div">
                             {`Contact : ${user?.email}`}
@@ -70,7 +72,24 @@ const MyProfilePage:React.FC = () => {
                     </Stack>
                     </Stack>
                 </Paper>
-                <SightingsContainer />
+                <Stack direction="row" spacing={2}
+                    sx={{width: '80%',marginLeft: 'auto', marginRight:'auto', marginTop: '2%',
+                }}>
+                    <SvgIcon fontSize='large'>
+                        <ForestIcon />
+                    </SvgIcon>
+
+                    <Typography variant="h5" component="div" 
+                        sx={{backgroundColor: theme.palette.primary.contrastText, }}>
+                            Sightings
+                    </Typography>
+                </Stack>
+                <Paper elevation={2}
+                    variant="elevation"
+                    sx={{width: '80%', marginLeft: 'auto', marginRight:'auto', marginTop: '1%'
+                     }}>
+                    <SightingsContainer />
+                </Paper>
             </ThemeProvider>
         </>
     )

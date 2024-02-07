@@ -4,6 +4,7 @@ import { api } from "./Service"
 import { domainToASCII } from "url"
 import { stat } from "fs"
 import { UserRegister } from "../dtos/userRegister"
+import { SightingSummaryUser } from "../models/Sighting"
 
 class UserService {
     public async Signin(email: string, password: string) {
@@ -63,12 +64,12 @@ class UserService {
             if (axios.isAxiosError(error)) {
                 console.log('error message while getting user info: ', error.message);
                 
-                return null;
+                return null
             } else {
                 console.log('unexpected error while getting user info: ', error);
 
                 //const errObject: Location = new Location(0, '')
-                return null;
+                return null
             }
         }
     }
@@ -86,12 +87,36 @@ class UserService {
             if (axios.isAxiosError(error)) {
                 console.log('error message while updating user name: ', error.message);
                 
-                return false;
+                return false
             } else {
                 console.log('unexpected error while updating user name: ', error);
 
                 //const errObject: Location = new Location(0, '')
-                return false;
+                return false
+            }
+        }
+    }
+
+
+    public async GetMySightings(){
+        try{
+            const {data, status} = await api.get<SightingSummaryUser[]>(`user/getMySightings/`)
+
+            console.log(JSON.stringify(data, null, 4));
+            console.log('response status is: ', status);
+
+            return data
+        }
+        catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.log('error message while updating user name: ', error.message);
+                
+                return null
+            } else {
+                console.log('unexpected error while updating user name: ', error);
+
+                //const errObject: Location = new Location(0, '')
+                return null
             }
         }
     }

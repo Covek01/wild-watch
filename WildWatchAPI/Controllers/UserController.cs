@@ -198,5 +198,21 @@ namespace WildWatchAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [Authorize]
+        [HttpGet("getMySightings")]
+        public async Task<ActionResult> GetMySightings()
+        {
+            try
+            {
+                var result = await _userService.GetMySightings();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

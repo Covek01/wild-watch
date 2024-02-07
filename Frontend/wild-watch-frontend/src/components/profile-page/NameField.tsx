@@ -8,6 +8,7 @@ import {Stack, Typography, ThemeProvider, Paper, Dialog, DialogTitle, DialogActi
 import UserService from '../../services/UserService'
 import theme from '../../themes/Theme'
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
+import * as helpers from '../../utils/helpers'
 
 interface props{
     text:string,
@@ -29,10 +30,17 @@ const NameField: React.FC<props> = ({text, setName, user}) => {
         setDialogOpen(false)
     }
 
-    const setNameInLocalStorage = (name: string) => {
-        const oldUser = JSON.parse(localStorage.getItem('user') ?? "")
-        oldUser.name = textName
-        localStorage.setItem('user', JSON.stringify(oldUser));
+    const setNameInLocalStorage = async (name: string) => {
+        // const oldUser = JSON.parse(localStorage.getItem('user') ?? "")
+        // oldUser.name = textName
+        // localStorage.setItem('user', JSON.stringify(oldUser));
+
+        const u = await UserService.GetUserInfo(user?.id ?? '-1')
+        if (u !== null){
+            helpers.lsRemoveToken()
+            helpers.lsSetUser(u)
+        }
+
     }
 
     const updateUsername = async () => {
@@ -41,7 +49,7 @@ const NameField: React.FC<props> = ({text, setName, user}) => {
         }
         const isOkay = await UserService.UpdateUserName(user.id, textName)
         if (isOkay){
-            setNameInLocalStorage(textName)
+            await setNameInLocalStorage(textName)
             setName(textName)
             setShowTextName(textName)
             user.name = textName

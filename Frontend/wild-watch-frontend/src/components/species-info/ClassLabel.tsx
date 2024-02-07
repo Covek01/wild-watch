@@ -14,13 +14,13 @@ interface props{
 
 const ClassLabel:React.FC<props>  = ({name}) => {
 
-    const name2: string = 'australpitecus'
+    const name2: string = 'australopitecus'
     return(
         <>
             <Typography
                 style={{ color: theme.palette.primary.contrastText, marginRight: '5%', marginLeft: '15%' }}
                 variant="body2" component="div">
-                {`Latin name : ${name2}`}
+                {`Class name : ${name}`}
             </Typography>
         </>
     )

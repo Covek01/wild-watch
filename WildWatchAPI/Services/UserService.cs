@@ -503,16 +503,44 @@ namespace WildWatchAPI.Services
                 var speciesUpdateOptions = new UpdateOptions { ArrayFilters = speciesArrayFilters };
 
 
-                var result = await _context.Users.UpdateOneAsync(user, update);
-                var resultSightings = await _context.Sightings.UpdateManyAsync(userSightings, userSightingsUpdate);
-                var resultHabitat = await _context.Habitats.UpdateManyAsync(userHabitat, userHabitatUpdate, habitatUpdateOptions);
-                var resultSpecies = await _context.Species.UpdateManyAsync(userSpecies, userSpeciesUpdate, speciesUpdateOptions);
-                int a = 1;
-
+                var result = await _context.Users.UpdateOneAsync(session, user, update);
+                var resultSightings = await _context.Sightings.UpdateManyAsync(session, userSightings, userSightingsUpdate);
+                var resultHabitat = await _context.Habitats.UpdateManyAsync(session, userHabitat, userHabitatUpdate, habitatUpdateOptions);
+                var resultSpecies = await _context.Species.UpdateManyAsync(session, userSpecies, userSpeciesUpdate, speciesUpdateOptions);
+                await session.CommitTransactionAsync();
             }
             catch (Exception)
             {
                 await session.AbortTransactionAsync();
+                throw new Exception("User service failed");
+            }
+        }
+
+        public async Task<List<SightingSummaryUser>> GetMySightings()
+        {
+            try
+            {
+                var id = string.Empty;
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    id = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (string.IsNullOrEmpty(id))
+                    {
+                        throw new Exception("Token error");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Token error");
+                }
+
+                var filter = Builders<User>.Filter.Where(u => u.Id == id);
+                var user = await _context.Users.Find(filter).FirstOrDefaultAsync();
+
+                return user.Sightings;
+            }
+            catch (Exception)
+            {
                 throw new Exception("User service failed");
             }
         }
