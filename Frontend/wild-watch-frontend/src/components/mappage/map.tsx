@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Bar from '../crucials/Bar'
-import { Circle, MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
+import { Circle, MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents } from 'react-leaflet'
 import { useTheme } from '@emotion/react'
 import { useMapContext } from '../../contexts/map.context'
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -19,13 +19,12 @@ import { LocationI } from '../../types/location'
 import { green } from '@mui/material/colors'
 import HabitatCircle from './habitatCircle'
 import MarkerClusterGroup from 'react-leaflet-cluster'
+import Locator from './locator'
+import ClickMarker from "./clickMarker"
 let DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow
 });
-
-
-
 
 L.Marker.prototype.options.icon = DefaultIcon
 const Map: React.FC = () => {
@@ -36,7 +35,9 @@ const Map: React.FC = () => {
     const [sightingMarkersState, setSightingMarkersState] = useState<L.DivIcon[]>([])
     const { setSightings, setHabitats, sightings, habitats } = useMapContext();
     const snackBar = useSnackbar();
-    let defaultCenter = { lat: 45, lng: 20.5 };
+    const [defaultCenterState, setDefaultCenterState] = useState<{ lat: number, lng: number }>({ lat: 45, lng: 20.5 });
+    const [clickMarkerCoordsState, setClickMarkerCoordsState] = useState<{ lat:number, lng: number } | null>(null);
+    // let defaultCenter = { lat: 45, lng: 20.5 };
     let defaultZoom = 13;
 
     useEffect(() => {
@@ -44,9 +45,9 @@ const Map: React.FC = () => {
             HabitatService.GetHabitatsWithNumberOfSightings()
                 .then(res => {
                     setHabitatsState(res.data ?? [])
-                    if(res.data!=null){
-                        const sights:Sighting[]=[];
-                        res.data.forEach(h=>sights.push(...h.sightings))
+                    if (res.data != null) {
+                        const sights: Sighting[] = [];
+                        res.data.forEach(h => sights.push(...h.sightings))
                         setSightingsState(sights)
                     }
                 })
@@ -58,12 +59,11 @@ const Map: React.FC = () => {
                 })
         }
         else {
-            const sights:Sighting[]=[];
+            const sights: Sighting[] = [];
             sights.push(...sightings)
-            habitats.forEach(h=>sights.push(...h.sightings))
+            habitats.forEach(h => sights.push(...h.sightings))
             setHabitatsState(habitats)
             setSightingsState(sights)
-            console.log(sights)
         }
         // const sig1: Sighting = new Sighting(
         //     "testid",
@@ -138,7 +138,6 @@ const Map: React.FC = () => {
     }, [sightingsState])
 
     useEffect(() => {
-        console.log("Sta")
         if (habitatsState.length !== 0) {
             let centers: LocationI[] = [];
             let radiuses: number[] = [];
@@ -177,10 +176,11 @@ const Map: React.FC = () => {
 
     }, [habitatsState])
 
+ 
     return (
         <div className='w-screen h-screen'>
             <Bar />
-            <MapContainer style={{ height: 'calc(100vh - 63px)', width: '100%', background: '#8bc34a', }} className="z-10" center={defaultCenter} zoom={defaultZoom} scrollWheelZoom={true}>
+            <MapContainer style={{ height: 'calc(100vh - 63px)', width: '100%', background: '#8bc34a', }} className="z-10" center={defaultCenterState} zoom={defaultZoom} scrollWheelZoom={true}>
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -212,6 +212,9 @@ const Map: React.FC = () => {
                     // console.log("here");
                     return <Circle key={index} center={[habitatsCenterState[index].coordinates.latitude, habitatsCenterState[index].coordinates.longitude]} pathOptions={{ fillColor: 'green' }} radius={habitatsRadiusState[index] * 111000} />
                 })}
+                <ClickMarker setClickMarkerCoordsState={setClickMarkerCoordsState} />
+
+                <Locator setDefaultCenterState={setDefaultCenterState} />
             </MapContainer>
         </div>
     )
