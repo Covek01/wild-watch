@@ -544,5 +544,46 @@ namespace WildWatchAPI.Services
                 throw new Exception("User service failed");
             }
         }
+
+        public async Task<List<FavouriteSpeciesDto>> GetMyFavouriteSpecies()
+        {
+            try
+            {
+                var id = string.Empty;
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    id = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (string.IsNullOrEmpty(id))
+                    {
+                        throw new Exception("Token error");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Token error");
+                }
+
+                var filter = Builders<User>.Filter.Where(u => u.Id == id);
+                var user = await _context.Users.Find(filter).FirstOrDefaultAsync();
+
+                List<Species> lista = new List<Species>();
+                foreach (var speciesId in user.FavouriteSpecies)
+                {
+                    var filterFavSpecies = Builders<Species>.Filter.Where(s => new MongoDBRef("Species", s.Id) == speciesId);
+                    var s = _context.Species.Find(filterFavSpecies).FirstOrDefault();
+                    lista.Add(s);
+                }
+                if (lista.Count == 0)
+                {
+                    return new List<FavouriteSpeciesDto>();
+                }
+                var e = lista.Select(l => new FavouriteSpeciesDto { Id = l.Id, CommonName = l.CommonName }).ToList();
+                return e;
+            }
+            catch (Exception)
+            {
+                throw new Exception("User service failed");
+            }
+        }
     }
 }

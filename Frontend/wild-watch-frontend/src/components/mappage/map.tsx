@@ -40,78 +40,78 @@ const Map: React.FC = () => {
     let defaultZoom = 13;
 
     useEffect(() => {
-        if (habitats.length === 0 && sightings.length === 0) {
-            HabitatService.GetHabitatsWithNumberOfSightings()
-                .then(res => {
-                    setHabitatsState(res.data ?? [])
-                })
-                .catch(err => {
-                    snackBar.openSnackbar({
-                        message: err,
-                        severity: 'error',
-                    })
-                })
-        }
-        else {
-            setHabitatsState(habitats)
-            setSightingsState(sightings)
-        }
-        // const sig1: Sighting = new Sighting(
-        //     "testid",
-        //     new Date(Date.now()),
-        //     {
-        //         coordinates: {
-        //             latitude: 45,
-        //             longitude: 20.5,
-        //             values: [20.5, 45]
-        //         }
-        //     },
-        //     new UserSummary(
-        //         'nesto',
-        //         'Aleksandar Stojkovic',
-        //         'a@elfak.rs',
-        //         4
-        //     ),
-        //     new SpeciesSummary(
-        //         "aaa",
-        //         Klasa.Birds,
-        //         "duck",
-        //         "duckus",
-        //         `https://m.media-amazon.com/images/I/51VXgNZFIoL.jpg`,
-        //         'sve ume',
-        //         'protected'
-        //     ),
-        //     'https://nationalzoo.si.edu/sites/default/files/styles/wide/public/animals/ruddy-duck-male-20210402-817a2187-003rp.jpg?itok=izfpFvYK'
-        // )
+        // if (habitats.length === 0 && sightings.length === 0) {
+        //     HabitatService.GetHabitatsWithNumberOfSightings()
+        //         .then(res => {
+        //             setHabitatsState(res.data ?? [])
+        //         })
+        //         .catch(err => {
+        //             snackBar.openSnackbar({
+        //                 message: err,
+        //                 severity: 'error',
+        //             })
+        //         })
+        // }
+        // else {
+        //     setHabitatsState(habitats)
+        //     setSightingsState(sightings)
+        // }
+        const sig1: Sighting = new Sighting(
+            "testid",
+            new Date(Date.now()),
+            {
+                coordinates: {
+                    latitude: 45,
+                    longitude: 20.5,
+                    values: [20.5, 45]
+                }
+            },
+            new UserSummary(
+                'nesto',
+                'Aleksandar Stojkovic',
+                'a@elfak.rs',
+                4
+            ),
+            new SpeciesSummary(
+                "aaa",
+                Klasa.Birds,
+                "duck",
+                "duckus",
+                `https://m.media-amazon.com/images/I/51VXgNZFIoL.jpg`,
+                'sve ume',
+                'protected'
+            ),
+            'https://nationalzoo.si.edu/sites/default/files/styles/wide/public/animals/ruddy-duck-male-20210402-817a2187-003rp.jpg?itok=izfpFvYK'
+        )
 
-        // const sig2: Sighting = new Sighting(
-        //     "testid",
-        //     new Date(Date.now()),
-        //     {
-        //         coordinates: {
-        //             latitude: 45,
-        //             longitude: 20.5001,
-        //             values: [20.5001, 45]
-        //         }
-        //     },
-        //     new UserSummary(
-        //         'nesto',
-        //         'Aleksandar Stojkovic',
-        //         'a@elfak.rs',
-        //         4
-        //     ),
-        //     new SpeciesSummary(
-        //         "aaa",
-        //         Klasa.Birds,
-        //         "duck",
-        //         "duckus",
-        //         `https://m.media-amazon.com/images/I/51VXgNZFIoL.jpg`,
-        //         'sve ume',
-        //         'protected'
-        //     ),
-        //     'https://nationalzoo.si.edu/sites/default/files/styles/wide/public/animals/ruddy-duck-male-20210402-817a2187-003rp.jpg?itok=izfpFvYK'
-        // )
-        // setSightingsState([sig1, sig2])
+        const sig2: Sighting = new Sighting(
+            "testid",
+            new Date(Date.now()),
+            {
+                coordinates: {
+                    latitude: 45,
+                    longitude: 20.5001,
+                    values: [20.5001, 45]
+                }
+            },
+            new UserSummary(
+                'nesto',
+                'Aleksandar Stojkovic',
+                'a@elfak.rs',
+                4
+            ),
+            new SpeciesSummary(
+                "aaa",
+                Klasa.Birds,
+                "duck",
+                "duckus",
+                `https://m.media-amazon.com/images/I/51VXgNZFIoL.jpg`,
+                'sve ume',
+                'protected'
+            ),
+            'https://nationalzoo.si.edu/sites/default/files/styles/wide/public/animals/ruddy-duck-male-20210402-817a2187-003rp.jpg?itok=izfpFvYK'
+        )
+        setSightingsState([sig1, sig2])
     }, [])
 
     useEffect(() => {

@@ -6,17 +6,16 @@ import {Stack, Avatar, Typography, ThemeProvider, Paper} from "@mui/material"
 import UserService from '../../services/UserService'
 import theme from '../../themes/Theme'
 import { useAuthContext } from '../../contexts/auth.context'
-import { Sighting } from '../../models/Sighting'
 import NameLabel from './NameLabel'
 import ClassLabel from './ClassLabel'
 import { Species } from '../../models/Species'
 import {useParams} from 'react-router-dom'
 import SpeciesService from '../../services/SpeciesService'
+import SightingsContainer from './SightingsContainer'
 
 const SpeciesInfo: React.FC = () => {
     const { isAuthenticated, signout, user } = useAuthContext();
     const [species, setSpecies] = useState<Species | null>(null)
-    const [speciesIdState, setSpeciesIdState] = useState<string>('-1')
     const params = useParams()
     const speciesId = params.id
 
@@ -67,6 +66,12 @@ const SpeciesInfo: React.FC = () => {
                     </Stack>
                 </Paper>
             </ThemeProvider>
+            <Paper elevation={2}
+                    variant="elevation"
+                    sx={{width: '80%', marginLeft: 'auto', marginRight:'auto', marginTop: '1%'
+                     }}>
+                    <SightingsContainer sightings={species?.sightings ?? []}/>
+            </Paper>
         </>
     )
 }
