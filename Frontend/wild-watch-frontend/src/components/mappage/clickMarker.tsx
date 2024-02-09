@@ -66,7 +66,7 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
                     </div> */}
                     <Box
                         sx={{
-                            height: "80vh",
+                            height: "70vh",
                             width: 400,
                             p: "1em",
                             display: "flex",
