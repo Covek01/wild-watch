@@ -104,7 +104,8 @@ namespace WildWatchAPI.Services
                     sightingId = sighting.Id,
                     Location = s.Location,
                     SightingTime = s.SightingTime,
-                    Sighter = userSummary
+                    Sighter = userSummary,
+                    ImageUrl=s.PhotoUrl??""
                 };
                 var speciesFilter = Builders<Species>.Filter.Where(sp => sp.Id == speciesId);
                 var speciesUpdate = Builders<Species>.Update.Push(sp => sp.Sightings, sightingSummarySpecies);
@@ -130,7 +131,8 @@ namespace WildWatchAPI.Services
                     Location = GeoJson.Point(s.Location),
                     SightingTime = s.SightingTime,
                     Sighter = userSummary,
-                    Species = speciesSummary
+                    Species = speciesSummary,
+                    ImageUrl=s.PhotoUrl??""
                 };
                 habitatDto.Sightings.Add(sightingSummaryHabitat);
                 await _habitatService.CreateAsync(session, habitatDto);
@@ -279,7 +281,8 @@ namespace WildWatchAPI.Services
                     Location =GeoJson.Point( s.Location),
                     SightingTime = s.SightingTime,
                     Sighter = userSummary,
-                    Species = speciesSummary
+                    Species = speciesSummary,
+                    ImageUrl=s.PhotoUrl??""
                 };
                 var sightingSummarySpecies = new SightingSummarySpecies()
                 {
@@ -287,6 +290,7 @@ namespace WildWatchAPI.Services
                     Location = s.Location,
                     Sighter = userSummary,
                     SightingTime = s.SightingTime,
+                    ImageUrl=s.PhotoUrl??""
                 };
 
                 if (sightingOld.Sighter.userId == s.SighterId)

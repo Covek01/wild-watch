@@ -20,6 +20,7 @@ namespace WildWatchAPI.Models
         public string sightingId { get; set; } = null!;
         public DateTime SightingTime { get; set; }
         public GeoJson2DGeographicCoordinates Location { get; set; } = null!;
+        public string? ImageUrl { get; set; }
 
         public UserSummary Sighter { get; set; } = null!;
     }
@@ -30,7 +31,7 @@ namespace WildWatchAPI.Models
         public DateTime SightingTime { get; set; }
         public GeoJsonPoint<GeoJson2DGeographicCoordinates> Location { get; set; } = null!;
         public SpeciesSummary Species { get; set; } = null!;
-
+        public string? ImageUrl { get; set; }
         public UserSummary Sighter { get; set; } = null!;
     }
 

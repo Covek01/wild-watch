@@ -44,6 +44,11 @@ const Map: React.FC = () => {
             HabitatService.GetHabitatsWithNumberOfSightings()
                 .then(res => {
                     setHabitatsState(res.data ?? [])
+                    if(res.data!=null){
+                        const sights:Sighting[]=[];
+                        res.data.forEach(h=>sights.push(...h.sightings))
+                        setSightingsState(sights)
+                    }
                 })
                 .catch(err => {
                     snackBar.openSnackbar({
@@ -53,8 +58,12 @@ const Map: React.FC = () => {
                 })
         }
         else {
+            const sights:Sighting[]=[];
+            sights.push(...sightings)
+            habitats.forEach(h=>sights.push(...h.sightings))
             setHabitatsState(habitats)
-            setSightingsState(sightings)
+            setSightingsState(sights)
+            console.log(sights)
         }
         // const sig1: Sighting = new Sighting(
         //     "testid",
@@ -199,7 +208,8 @@ const Map: React.FC = () => {
                     // L.circle([habitatsCenterState[index].coordinates.latitude, habitatsCenterState[index].coordinates.longitude],habitatsRadiusState[index]).addTo(map);
                     // <HabitatCircle lat={habitatsCenterState[index].coordinates.latitude} lng={habitatsCenterState[index].coordinates.longitude} radius={habitatsRadiusState[index]*111000}/>
                     // return true
-                    console.log("here");
+
+                    // console.log("here");
                     return <Circle key={index} center={[habitatsCenterState[index].coordinates.latitude, habitatsCenterState[index].coordinates.longitude]} pathOptions={{ fillColor: 'green' }} radius={habitatsRadiusState[index] * 111000} />
                 })}
             </MapContainer>
