@@ -8,7 +8,8 @@ import { AuthStateProvider } from './contexts/auth.context';
 import AuthenticatedGuard from './routeGuards/AuthenticatedGuard';
 import { SignIn } from './components/signIn/signIn';
 import { SignUp } from './components/signup/signup';
-import SpeciesInfo from './components/species-info/SpeciesInfo';
+import SpeciesInfo from './components/species-info/SpeciesInfo'
+import MyProfilePage from './components/profile-page/MyProfilePage';
 import theme from './themes/Theme';
 import { ThemeProvider } from '@emotion/react';
 import { SnackbarProvider } from './contexts/snackbar.context';
@@ -28,9 +29,10 @@ function App() {
               <MapStateProvider>
                 <Routes>
                   <Route>
-                    <Route index element={<Navigate to="/speciesinfo" replace />}></Route>
+                    <Route index element={<Navigate to="/map" replace />}></Route>
                     <Route path="/homepage" element={<Homepage />} />
-                    <Route path="/speciesinfo" element={<NotAuthenticatedGuard>{<SpeciesInfo />}</NotAuthenticatedGuard>}></Route>
+                    <Route path="/myprofile" element={<NotAuthenticatedGuard>{<MyProfilePage />}</NotAuthenticatedGuard>}></Route>
+                    <Route path="/speciesinfo/:id" element={<NotAuthenticatedGuard>{<SpeciesInfo />}</NotAuthenticatedGuard>}></Route>
                     <Route path="/map" element={<NotAuthenticatedGuard>{<Map />}</NotAuthenticatedGuard>}></Route>
 
                     <Route

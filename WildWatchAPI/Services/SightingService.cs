@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.GeoJsonObjectModel;
+using System.Security.Claims;
 using WildWatchAPI.Context;
 using WildWatchAPI.DTOs;
 using WildWatchAPI.Models;
@@ -348,6 +349,24 @@ namespace WildWatchAPI.Services
             {
                 await session.AbortTransactionAsync();
                 throw new Exception("Sighting service failed");
+            }
+        }
+
+        public async Task<List<Sighting>> GetSightingsBySighter(string sighterId)
+        {
+            using var session = await _context.MongoClient.StartSessionAsync();
+            session.StartTransaction();
+            try
+            {
+                var sightingsFilter = Builders<Sighting>.Filter.Where(s => s.Sighter.userId == sighterId);
+                var sightings = await _context.Sightings.Find(sightingsFilter).ToListAsync();
+
+                return sightings;
+            }
+            catch (Exception)
+            {
+                await session.AbortTransactionAsync();
+                throw new Exception("User service failed");
             }
         }
 

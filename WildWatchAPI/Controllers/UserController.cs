@@ -183,5 +183,36 @@ namespace WildWatchAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        //[Authorize]
+        [HttpPut("setUserName/{id}/{username}")]
+        public async Task<ActionResult> SetUserName(string id, string username)
+        {
+            try
+            {
+                await _userService.SetUserName(id, username);
+                return Ok("Succesfully changed username to " + username);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("getMySightings")]
+        public async Task<ActionResult> GetMySightings()
+        {
+            try
+            {
+                var result = await _userService.GetMySightings();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

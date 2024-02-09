@@ -8,6 +8,8 @@ import {
 
 } from "react-router-dom";
 import 'leaflet/dist/leaflet.css'
+import theme from './themes/Theme';
+
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

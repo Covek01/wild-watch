@@ -464,5 +464,85 @@ namespace WildWatchAPI.Services
             }
             return user.Location;
         }
+
+        public async Task SetUserName(string id, string userName)
+        {
+            using var session = await _context.MongoClient.StartSessionAsync();
+            session.StartTransaction();
+            try
+            {
+                var user = Builders<User>.Filter.Where(u => u.Id == id);
+                var update = Builders<User>.Update
+                    .Set(u => u.Name, userName);
+
+                var userSightings = Builders<Sighting>.Filter.Where(u => u.Sighter.userId == id);
+                var userSightingsUpdate = Builders<Sighting>.Update
+                    .Set(s => s.Sighter.Name, userName);
+
+
+                var userHabitat = Builders<Habitat>.Filter
+                    .ElemMatch(h => h.Sightings, Builders<SightingSummaryHabitat>.Filter.Where(s => s.Sighter.userId == id));
+                var userHabitatUpdate = Builders<Habitat>.Update
+                    .Set("Sightings.$[s].Sighter.Name", userName);
+                var habitatArrayFilters = new List<ArrayFilterDefinition>
+                {
+                    new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                        new BsonDocument("s.Sighter.userId", id))
+                };
+                var habitatUpdateOptions = new UpdateOptions { ArrayFilters = habitatArrayFilters };
+
+                var userSpecies = Builders<Species>.Filter
+                   .ElemMatch(s => s.Sightings, Builders<SightingSummarySpecies>.Filter.Where(s => s.Sighter.userId == id));
+                var userSpeciesUpdate = Builders<Species>.Update
+                    .Set("Sightings.$[s].Sighter.Name", userName);
+                var speciesArrayFilters = new List<ArrayFilterDefinition>
+                {
+                    new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                        new BsonDocument("s.Sighter.userId", id))
+                };
+                var speciesUpdateOptions = new UpdateOptions { ArrayFilters = speciesArrayFilters };
+
+
+                var result = await _context.Users.UpdateOneAsync(session, user, update);
+                var resultSightings = await _context.Sightings.UpdateManyAsync(session, userSightings, userSightingsUpdate);
+                var resultHabitat = await _context.Habitats.UpdateManyAsync(session, userHabitat, userHabitatUpdate, habitatUpdateOptions);
+                var resultSpecies = await _context.Species.UpdateManyAsync(session, userSpecies, userSpeciesUpdate, speciesUpdateOptions);
+                await session.CommitTransactionAsync();
+            }
+            catch (Exception)
+            {
+                await session.AbortTransactionAsync();
+                throw new Exception("User service failed");
+            }
+        }
+
+        public async Task<List<SightingSummaryUser>> GetMySightings()
+        {
+            try
+            {
+                var id = string.Empty;
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    id = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (string.IsNullOrEmpty(id))
+                    {
+                        throw new Exception("Token error");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Token error");
+                }
+
+                var filter = Builders<User>.Filter.Where(u => u.Id == id);
+                var user = await _context.Users.Find(filter).FirstOrDefaultAsync();
+
+                return user.Sightings;
+            }
+            catch (Exception)
+            {
+                throw new Exception("User service failed");
+            }
+        }
     }
 }

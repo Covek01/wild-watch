@@ -24,7 +24,7 @@ const Bar: React.FC = () => {
     }
 
     const handleClickMyProfile = () => {
-
+        navigate("/myprofile")
     }
 
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);

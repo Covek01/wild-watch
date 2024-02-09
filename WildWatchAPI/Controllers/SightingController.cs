@@ -68,5 +68,36 @@ namespace WildWatchAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("getBySighter/{id}")]
+        public async Task<ActionResult> GetSightingsBySighter(string id)
+        {
+            try
+            {
+                var result = await _sightingService.GetSightingsBySighter(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("getMySightings")]
+        public async Task<ActionResult> GetMySightings()
+        {
+            try
+            {
+                var claims = HttpContext.User.Claims;
+                var userId = claims.Where(c => c.Type == "Id").FirstOrDefault()?.Value ?? "-1";
+
+                var result = await _sightingService.GetSightingsBySighter(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
