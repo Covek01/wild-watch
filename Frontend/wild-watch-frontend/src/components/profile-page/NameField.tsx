@@ -1,7 +1,5 @@
 import React from 'react'
 import {useState, useEffect} from 'react'
-import Bar from '../crucials/Bar'
-import Map from '../homepage/Map'
 import { Box, Button, DialogContent, IconButton } from '@mui/material'
 import {User} from '../../models/User'
 import {Stack, Typography, ThemeProvider, Paper, Dialog, DialogTitle, DialogActions, TextField} from "@mui/material"
@@ -37,10 +35,14 @@ const NameField: React.FC<props> = ({text, setName, user}) => {
 
         const u = await UserService.GetUserInfo(user?.id ?? '-1')
         if (u !== null){
-            helpers.lsRemoveToken()
+            helpers.lsRemoveUser()
             helpers.lsSetUser(u)
         }
 
+    }
+
+    const initializeUsername = async (name: string) => {
+        const u = await UserService.GetUserInfo(user?.id ?? '-1')
     }
 
     const updateUsername = async () => {
@@ -52,9 +54,7 @@ const NameField: React.FC<props> = ({text, setName, user}) => {
             await setNameInLocalStorage(textName)
             setName(textName)
             setShowTextName(textName)
-            user.name = textName
         }
-        
         handleClose()
     }
 

@@ -84,7 +84,19 @@ namespace WildWatchAPI.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
-                throw;
+            }
+        }
+
+        [HttpGet("getByCommonNameFiltered/{name}")]
+        public async Task<ActionResult> GetByCommonNameFiltered([FromRoute] string name)
+        {
+            try
+            {
+                return Ok(await _speciesService.GetByCommonNameFiltered(name));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

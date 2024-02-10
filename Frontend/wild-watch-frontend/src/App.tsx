@@ -18,6 +18,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import NotAuthenticatedGuard from './routeGuards/NotAuthenticatedGuard';
 import Map from './components/mappage/map';
 import { MapStateProvider } from './contexts/map.context';
+import SpeciesList from './components/species-list/SpeciesList';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
                     <Route path="/homepage" element={<Homepage />} />
                     <Route path="/myprofile" element={<NotAuthenticatedGuard>{<MyProfilePage />}</NotAuthenticatedGuard>}></Route>
                     <Route path="/speciesinfo/:id" element={<NotAuthenticatedGuard>{<SpeciesInfo />}</NotAuthenticatedGuard>}></Route>
+                    <Route path="/species" element={<NotAuthenticatedGuard>{<SpeciesList />}</NotAuthenticatedGuard>}></Route>
                     <Route path="/map" element={<NotAuthenticatedGuard>{<Map />}</NotAuthenticatedGuard>}></Route>
 
                     <Route

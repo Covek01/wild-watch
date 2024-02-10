@@ -1,4 +1,6 @@
-﻿using MongoDB.Bson;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using WildWatchAPI.Context;
 using WildWatchAPI.DTOs;
@@ -165,5 +167,40 @@ namespace WildWatchAPI.Services
             return species;
         }
 
+        public async Task<List<SpeciesWithIdDto>> GetByCommonNameFiltered(string commonName)
+        {
+            try
+            {
+                commonName = commonName.ToLower();
+                //var speciesFilter = Builders<Species>.Filter.Where(sp => sp.CommonName.ToLower() == commonName.ToLower());
+                var speciesFilter = Builders<Species>.Filter.Regex("CommonName",
+                    new BsonRegularExpression($"^[{commonName[0]},{commonName.ToUpper()[0]}]{commonName[1..]}"));
+                var projection = Builders<Species>.Projection
+                        .Exclude(p => p.Sightings)
+                        .Exclude(p => p.Habitats);
+
+                var species = await _context.Species.Find(speciesFilter).Project(projection).ToListAsync();
+                
+
+                List<SpeciesWithIdDto> speciesObjects = new List<SpeciesWithIdDto>();
+
+                foreach (var document in species)
+                {
+                    var speciesObject = BsonSerializer.Deserialize<SpeciesWithIdDto>(document);
+                    speciesObjects.Add(speciesObject);
+                }
+
+                if (species == default)
+                {
+                    throw new Exception("Invalid Id");
+                }
+                return speciesObjects;
+
+            }
+            catch (Exception)
+            { 
+                throw new Exception("Species service failed");
+            }
+        }
     }
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import Bar from '../crucials/Bar'
-import { Circle, MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
+import { Circle, MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents } from 'react-leaflet'
 import { useTheme } from '@emotion/react'
 import { useMapContext } from '../../contexts/map.context'
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -19,13 +19,12 @@ import { LocationI } from '../../types/location'
 import { green } from '@mui/material/colors'
 import HabitatCircle from './habitatCircle'
 import MarkerClusterGroup from 'react-leaflet-cluster'
+import Locator from './locator'
+import ClickMarker from "./clickMarker"
 let DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow
 });
-
-
-
 
 L.Marker.prototype.options.icon = DefaultIcon
 const Map: React.FC = () => {
@@ -36,82 +35,92 @@ const Map: React.FC = () => {
     const [sightingMarkersState, setSightingMarkersState] = useState<L.DivIcon[]>([])
     const { setSightings, setHabitats, sightings, habitats } = useMapContext();
     const snackBar = useSnackbar();
-    let defaultCenter = { lat: 45, lng: 20.5 };
+    const [defaultCenterState, setDefaultCenterState] = useState<{ lat: number, lng: number }>({ lat: 45, lng: 20.5 });
+    const [clickMarkerCoordsState, setClickMarkerCoordsState] = useState<{ lat:number, lng: number } | null>(null);
+    // let defaultCenter = { lat: 45, lng: 20.5 };
     let defaultZoom = 13;
 
     useEffect(() => {
-        // if (habitats.length === 0 && sightings.length === 0) {
-        //     HabitatService.GetHabitatsWithNumberOfSightings()
-        //         .then(res => {
-        //             setHabitatsState(res.data ?? [])
-        //         })
-        //         .catch(err => {
-        //             snackBar.openSnackbar({
-        //                 message: err,
-        //                 severity: 'error',
-        //             })
-        //         })
-        // }
-        // else {
-        //     setHabitatsState(habitats)
-        //     setSightingsState(sightings)
-        // }
-        const sig1: Sighting = new Sighting(
-            "testid",
-            new Date(Date.now()),
-            {
-                coordinates: {
-                    latitude: 45,
-                    longitude: 20.5,
-                    values: [20.5, 45]
-                }
-            },
-            new UserSummary(
-                'nesto',
-                'Aleksandar Stojkovic',
-                'a@elfak.rs',
-                4
-            ),
-            new SpeciesSummary(
-                "aaa",
-                Klasa.Birds,
-                "duck",
-                "duckus",
-                `https://m.media-amazon.com/images/I/51VXgNZFIoL.jpg`,
-                'sve ume',
-                'protected'
-            ),
-            'https://nationalzoo.si.edu/sites/default/files/styles/wide/public/animals/ruddy-duck-male-20210402-817a2187-003rp.jpg?itok=izfpFvYK'
-        )
+        if (habitats.length === 0 && sightings.length === 0) {
+            HabitatService.GetHabitatsWithNumberOfSightings()
+                .then(res => {
+                    setHabitatsState(res.data ?? [])
+                    if (res.data != null) {
+                        const sights: Sighting[] = [];
+                        res.data.forEach(h => sights.push(...h.sightings))
+                        setSightingsState(sights)
+                    }
+                })
+                .catch(err => {
+                    snackBar.openSnackbar({
+                        message: err,
+                        severity: 'error',
+                    })
+                })
+        }
+        else {
+            const sights: Sighting[] = [];
+            sights.push(...sightings)
+            habitats.forEach(h => sights.push(...h.sightings))
+            setHabitatsState(habitats)
+            setSightingsState(sights)
+        }
+        // const sig1: Sighting = new Sighting(
+        //     "testid",
+        //     new Date(Date.now()),
+        //     {
+        //         coordinates: {
+        //             latitude: 45,
+        //             longitude: 20.5,
+        //             values: [20.5, 45]
+        //         }
+        //     },
+        //     new UserSummary(
+        //         'nesto',
+        //         'Aleksandar Stojkovic',
+        //         'a@elfak.rs',
+        //         4
+        //     ),
+        //     new SpeciesSummary(
+        //         "aaa",
+        //         Klasa.Birds,
+        //         "duck",
+        //         "duckus",
+        //         `https://m.media-amazon.com/images/I/51VXgNZFIoL.jpg`,
+        //         'sve ume',
+        //         'protected'
+        //     ),
+        //     'https://nationalzoo.si.edu/sites/default/files/styles/wide/public/animals/ruddy-duck-male-20210402-817a2187-003rp.jpg?itok=izfpFvYK'
+        // )
 
-        const sig2: Sighting = new Sighting(
-            "testid",
-            new Date(Date.now()),
-            {
-                coordinates: {
-                    latitude: 45,
-                    longitude: 20.5001,
-                    values: [20.5001, 45]
-                }
-            },
-            new UserSummary(
-                'nesto',
-                'Aleksandar Stojkovic',
-                'a@elfak.rs',
-                4
-            ),
-            new SpeciesSummary(
-                "aaa",
-                Klasa.Birds,
-                "duck",
-                "duckus",
-                `https://m.media-amazon.com/images/I/51VXgNZFIoL.jpg`,
-                'sve ume',
-                'protected'
-            ),
-            'https://nationalzoo.si.edu/sites/default/files/styles/wide/public/animals/ruddy-duck-male-20210402-817a2187-003rp.jpg?itok=izfpFvYK'
-        )
-        setSightingsState([sig1, sig2])
+        // const sig2: Sighting = new Sighting(
+        //     "testid",
+        //     new Date(Date.now()),
+        //     {
+        //         coordinates: {
+        //             latitude: 45,
+        //             longitude: 20.5001,
+        //             values: [20.5001, 45]
+        //         }
+        //     },
+        //     new UserSummary(
+        //         'nesto',
+        //         'Aleksandar Stojkovic',
+        //         'a@elfak.rs',
+        //         4
+        //     ),
+        //     new SpeciesSummary(
+        //         "aaa",
+        //         Klasa.Birds,
+        //         "duck",
+        //         "duckus",
+        //         `https://m.media-amazon.com/images/I/51VXgNZFIoL.jpg`,
+        //         'sve ume',
+        //         'protected'
+        //     ),
+        //     'https://nationalzoo.si.edu/sites/default/files/styles/wide/public/animals/ruddy-duck-male-20210402-817a2187-003rp.jpg?itok=izfpFvYK'
+        // )
+        // setSightingsState([sig1, sig2])
     }, [])
 
     useEffect(() => {
@@ -129,7 +138,6 @@ const Map: React.FC = () => {
     }, [sightingsState])
 
     useEffect(() => {
-        console.log("Sta")
         if (habitatsState.length !== 0) {
             let centers: LocationI[] = [];
             let radiuses: number[] = [];
@@ -168,10 +176,11 @@ const Map: React.FC = () => {
 
     }, [habitatsState])
 
+ 
     return (
         <div className='w-screen h-screen'>
             <Bar />
-            <MapContainer style={{ height: 'calc(100vh - 63px)', width: '100%', background: '#8bc34a', }} className="z-10" center={defaultCenter} zoom={defaultZoom} scrollWheelZoom={true}>
+            <MapContainer style={{ height: 'calc(100vh - 63px)', width: '100%', background: '#8bc34a', }} className="z-10" center={defaultCenterState} zoom={defaultZoom} scrollWheelZoom={true}>
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -199,9 +208,13 @@ const Map: React.FC = () => {
                     // L.circle([habitatsCenterState[index].coordinates.latitude, habitatsCenterState[index].coordinates.longitude],habitatsRadiusState[index]).addTo(map);
                     // <HabitatCircle lat={habitatsCenterState[index].coordinates.latitude} lng={habitatsCenterState[index].coordinates.longitude} radius={habitatsRadiusState[index]*111000}/>
                     // return true
-                    console.log("here");
+
+                    // console.log("here");
                     return <Circle key={index} center={[habitatsCenterState[index].coordinates.latitude, habitatsCenterState[index].coordinates.longitude]} pathOptions={{ fillColor: 'green' }} radius={habitatsRadiusState[index] * 111000} />
                 })}
+                <ClickMarker setClickMarkerCoordsState={setClickMarkerCoordsState} />
+
+                <Locator setDefaultCenterState={setDefaultCenterState} />
             </MapContainer>
         </div>
     )

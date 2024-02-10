@@ -14,5 +14,6 @@ namespace WildWatchAPI.Services
         public Task<Species> GetAsync(string speciesId);
 
         public Task<Species> GetByCommonName(string commonName);
+        public Task<List<SpeciesWithIdDto>> GetByCommonNameFiltered(string commonName);
     }
 }

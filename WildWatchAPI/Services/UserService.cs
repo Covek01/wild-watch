@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using MongoDB.Bson;
 using MongoDB.Driver.GeoJsonObjectModel;
+using MongoDB.Bson.Serialization;
 
 namespace WildWatchAPI.Services
 {
@@ -236,6 +237,18 @@ namespace WildWatchAPI.Services
             return user;
         }
 
+        public async Task<User> GetAsync2(string userId)
+        {
+            /*  var projection = Builders<User>.Projection.Exclude(u => u.FavouriteSpecies);
+              var user = await _context.Users.Find(u => u.Id == userId).Project(projection).FirstOrDefaultAsync();
+              if (user == default)
+              {
+                  throw new Exception("Invalid Id");
+              }
+              return user;*/
+            return null;
+        }
+
         //public async Task<User> UpdateAsync(string userId, UserUpdateDto user)
         //{
         //    using var session = await _context.MongoClient.StartSessionAsync();
@@ -390,9 +403,9 @@ namespace WildWatchAPI.Services
             {
                 throw new Exception("Token error");
             }
-            var userFilter = Builders<User>.Filter.Where(u => u.Id == id&& !u.FavouriteSpecies.Contains(new MongoDBRef("Species", speciesId)));
+            var userFilter = Builders<User>.Filter.Where(u => u.Id == id && !u.FavouriteSpecies.Contains(new MongoDBRef("Species", speciesId)));
             var userUpdate = Builders<User>.Update.Push(u => u.FavouriteSpecies, new MongoDBRef("Species", speciesId));
-            await _context.Users.UpdateOneAsync(userFilter, userUpdate);
+            var count = await _context.Users.UpdateOneAsync(userFilter, userUpdate);
 
             return await _context.Users.Find(userFilter).FirstOrDefaultAsync();
 
@@ -579,6 +592,118 @@ namespace WildWatchAPI.Services
                 }
                 var e = lista.Select(l => new FavouriteSpeciesDto { Id = l.Id, CommonName = l.CommonName }).ToList();
                 return e;
+            }
+            catch (Exception)
+            {
+                throw new Exception("User service failed");
+            }
+        }
+
+        public async Task<List<string>> GetMyFavouriteSpeciesIds()
+        {
+            try
+            {
+                var id = string.Empty;
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    id = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (string.IsNullOrEmpty(id))
+                    {
+                        throw new Exception("Token error");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Token error");
+                }
+                var projection = Builders<User>.Projection
+                        .Include(p => p.FavouriteSpecies); 
+                var filter = Builders<User>.Filter.Where(u => u.Id == id);
+                var userFavorites = await _context.Users.Find(filter).FirstOrDefaultAsync();
+                List<string> lista = new List<string>();
+                foreach (var item in userFavorites.FavouriteSpecies)
+                {
+                    lista.Add(item.Id.ToString());
+                }
+                return lista;
+
+            }
+            catch (Exception)
+            {
+                throw new Exception("User service failed");
+            }
+        }
+
+        public async Task<List<string>> AddMyFavouriteSpecies2(string speciesId)
+        {
+            try
+            {
+                var id = string.Empty;
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    id = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (string.IsNullOrEmpty(id))
+                    {
+                        throw new Exception("Token error");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Token error");
+                }
+                var userFilter = Builders<User>.Filter.Where(u => u.Id == id && !u.FavouriteSpecies.Contains(new MongoDBRef("Species", speciesId)));
+                var userUpdate = Builders<User>.Update.Push(u => u.FavouriteSpecies, new MongoDBRef("Species", speciesId));
+                var count = await _context.Users.UpdateOneAsync(userFilter, userUpdate);
+
+                var projection = Builders<User>.Projection
+                        .Include(p => p.FavouriteSpecies);
+                var filter = Builders<User>.Filter.Where(u => u.Id == id);
+                var userFavorites = await _context.Users.Find(filter).FirstOrDefaultAsync();
+                List<string> lista = new List<string>();
+                foreach (var item in userFavorites.FavouriteSpecies)
+                {
+                    lista.Add(item.Id.ToString());
+                }
+                return lista;
+            }
+            catch(Exception)
+            {
+                throw new Exception("User service failed");
+            }
+
+        }
+
+        public async Task<List<string>> RemoveMyFavouriteSpecies2(string speciesId)
+        {
+            try
+            {
+                var id = string.Empty;
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    id = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (string.IsNullOrEmpty(id))
+                    {
+                        throw new Exception("Token error");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Token error");
+                }
+                var userFilter = Builders<User>.Filter.Where(u => u.Id == id);
+                var userUpdate = Builders<User>.Update.Pull(u => u.FavouriteSpecies, new MongoDBRef("Species", speciesId));
+                await _context.Users.UpdateOneAsync(userFilter, userUpdate);
+
+                var projection = Builders<User>.Projection
+                       .Include(p => p.FavouriteSpecies);
+                var filter = Builders<User>.Filter.Where(u => u.Id == id);
+                var userFavorites = await _context.Users.Find(filter).FirstOrDefaultAsync();
+                List<string> lista = new List<string>();
+                foreach (var item in userFavorites.FavouriteSpecies)
+                {
+                    lista.Add(item.Id.ToString());
+                }
+                return lista;
             }
             catch (Exception)
             {

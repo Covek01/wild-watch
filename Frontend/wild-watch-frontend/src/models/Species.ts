@@ -31,6 +31,36 @@ export class SpeciesSummary {
 }
 
 
+export class SpeciesDto {
+    id: string
+    classAnimal: Klasa
+    commonName: string
+    scientificName: string
+    imageUrl: string
+    description: string
+    conservationStatus: string
+
+    constructor(
+        id: string,
+        classAnimal: Klasa,
+        commonName: string,
+        scientificName: string,
+        imageUrl: string,
+        description: string,
+        conservationStatus: string
+    ) {
+        this.id = id;
+        this.classAnimal = classAnimal;
+        this.commonName = commonName;
+        this.scientificName = scientificName;
+        this.imageUrl = imageUrl;
+        this.description = description;
+        this.conservationStatus = conservationStatus;
+    }
+
+}
+
+
 export class Species {
     id: string
     classAnimal: Klasa
@@ -62,6 +92,16 @@ export class Species {
         this.conservationStatus = conservationStatus;
         this.sightings = sightings;
         this.habitats = habitats;
+    }
+}
+
+export class FavouriteSpecies{
+    public id: string;
+    public commonName: string ;
+
+    constructor(id:string, commonName: string){
+        this.id = id
+        this.commonName = commonName
     }
 }
 

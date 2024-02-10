@@ -105,7 +105,8 @@ namespace WildWatchAPI.Controllers
         {
             try
             {
-                return Ok(await _userService.GetAsync(Id));
+                var user = await _userService.GetAsync(Id);
+                return Ok(user);
             }
             catch (Exception ex)
             {
@@ -184,6 +185,34 @@ namespace WildWatchAPI.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPut("addFavouriteSpecies2/{id}")]
+        public async Task<ActionResult> AddFavouriteSpecies2([FromRoute] string id)
+        {
+            try
+            {
+                return Ok(await _userService.AddMyFavouriteSpecies2(id));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("removeFavouriteSpecies2/{id}")]
+        public async Task<ActionResult> RemoveFavouriteSpecies2([FromRoute] string id)
+        {
+            try
+            {
+                return Ok(await _userService.RemoveMyFavouriteSpecies2(id));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         //[Authorize]
         [HttpPut("setUserName/{id}/{username}")]
         public async Task<ActionResult> SetUserName(string id, string username)
@@ -214,5 +243,64 @@ namespace WildWatchAPI.Controllers
             }
         }
 
+        [Authorize]
+        [HttpGet("getMyFavouriteSpecies")]
+        public async Task<ActionResult> GetMyFavouriteSpecies()
+        {
+            try
+            {
+                var result = await _userService.GetMyFavouriteSpecies();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("addToMySpecies/{id}")]
+        public async Task<ActionResult> AddMyFavouriteSpecies(string id)
+        {
+            try
+            {
+                var result = await _userService.AddMyFavouriteSpecies(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPut("removeFromSpecies/{id}")]
+        public async Task<ActionResult> RemoveFromSpecies(string id)
+        {
+            try
+            {
+                var result = await _userService.RemoveMyFavouriteSpecies(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("getMyFavouriteSpeciesIds")]
+        public async Task<ActionResult> GetMyFavouriteSpeciesIds()
+        {
+            try
+            {
+                var result = await _userService.GetMyFavouriteSpeciesIds();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

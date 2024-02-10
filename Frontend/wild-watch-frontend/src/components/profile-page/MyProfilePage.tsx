@@ -17,25 +17,11 @@ import ForestIcon from '@mui/icons-material/Forest';
 
 const MyProfilePage:React.FC = () => {
     const { isAuthenticated, signout, user } = useAuthContext();
-    //const [user, setUser] = useState<User | null>(null)
     const [userNameField, setUserNameField] = useState<string>("")
-
-    // const setInitialUserInfo = async () => {
-    //     const userInfo = await UserService.GetUserInfo(id)
-    //     setUser(userInfo)
-    //     setUserNameField(userInfo?.name ?? "")
-    // }
 
     const setUserName = (name: string) => {
         setUserNameField(name)
     }
-
-    useEffect(() => {
-        setTimeout( () =>{
-            console.log(user)
-        }, 1000)
-        //setInitialUserInfo()
-    }, [])
 
     return (
         <>

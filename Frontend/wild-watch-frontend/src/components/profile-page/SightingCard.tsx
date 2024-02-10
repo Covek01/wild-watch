@@ -1,17 +1,7 @@
 import React from 'react'
 import {useState, useEffect} from 'react'
-import Bar from '../crucials/Bar'
-import Map from '../homepage/Map'
-import { Box } from '@mui/material'
-import {User} from '../../models/User'
 import {Stack, Avatar, Typography, ThemeProvider, Paper, Card, CardContent, CardActions,
 Collapse, IconButton, CardMedia, CardHeader, Button} from "@mui/material"
-import UserService from '../../services/UserService'
-import theme from '../../themes/Theme'
-import NameField from './NameField'
-import { useAuthContext } from '../../contexts/auth.context'
-import { Sighting } from '../../models/Sighting'
-import * as statusColor from '../../themes/StatusColor'
 import { useNavigate } from 'react-router-dom'
 import { SightingSummaryUser } from '../../models/Sighting'
 

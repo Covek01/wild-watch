@@ -8,7 +8,7 @@ const Bar: React.FC = () => {
     const navigate = useNavigate()
     const { isAuthenticated, signout, user } = useAuthContext();
     const handleClickSpecies = () => {
-
+         navigate("/species");
     }
 
     const handleClickMap = () => {

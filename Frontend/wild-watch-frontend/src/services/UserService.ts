@@ -5,6 +5,7 @@ import { domainToASCII } from "url"
 import { stat } from "fs"
 import { UserRegister } from "../dtos/userRegister"
 import { SightingSummaryUser } from "../models/Sighting"
+import { FavouriteSpecies } from "../models/Species"
 
 class UserService {
     public async Signin(email: string, password: string) {
@@ -67,8 +68,6 @@ class UserService {
                 return null
             } else {
                 console.log('unexpected error while getting user info: ', error);
-
-                //const errObject: Location = new Location(0, '')
                 return null
             }
         }
@@ -90,8 +89,6 @@ class UserService {
                 return false
             } else {
                 console.log('unexpected error while updating user name: ', error);
-
-                //const errObject: Location = new Location(0, '')
                 return false
             }
         }
@@ -111,11 +108,101 @@ class UserService {
             if (axios.isAxiosError(error)) {
                 console.log('error message while updating user name: ', error.message);
                 
-                return null
+                return []
             } else {
                 console.log('unexpected error while updating user name: ', error);
 
-                //const errObject: Location = new Location(0, '')
+                return []
+            }
+        }
+    }
+
+    public async GetMyFavouriteSpecies(){
+        try{
+            const {data, status} = await api.get<FavouriteSpecies[]>(`user/getMyFavouriteSpecies/`)
+
+            console.log(JSON.stringify(data, null, 4));
+            console.log('response status is: ', status);
+
+            return data
+        }
+        catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.log('error message while updating user name: ', error.message);
+                
+                return []
+            } else {
+                console.log('unexpected error while updating user name: ', error);
+
+                return []
+            }
+        }
+    }
+    
+
+    public async GetMyFavouriteSpeciesIds(){
+        try{
+            const {data, status} = await api.get<string[]>(`user/getMyFavouriteSpeciesIds/`)
+
+            console.log(JSON.stringify(data, null, 4));
+            console.log('response status is: ', status);
+
+            return data
+        }
+        catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.log('error message while updating user name: ', error.message);
+                
+                return []
+            } else {
+                console.log('unexpected error while updating user name: ', error);
+
+                return []
+            }
+        }
+    }
+
+
+    public async AddToMySpecies(id: string){
+        try{
+            const {data, status} = await api.put<string[]>(`user/addFavouriteSpecies2/${id}`)
+
+            console.log(JSON.stringify(data, null, 4));
+            console.log('response status is: ', status);
+
+            return data
+        }
+        catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.log('error message while updating favourite species: ', error.message);
+                
+                return null
+            } else {
+                console.log('unexpected error while updating user favourite species: ', error);
+
+                return null
+            }
+        }
+    }
+
+    public async RemoveFromSpecies(id: string){
+        try{
+            const {data, status} = await api.put<string[]>(`user/removeFavouriteSpecies2/${id}`)
+
+
+            console.log(JSON.stringify(data, null, 4));
+            console.log('response status is: ', status);
+
+            return data
+        }
+        catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.log('error message while updating user favourite species: ', error.message);
+                
+                return null
+            } else {
+                console.log('unexpected error while updating favourite species: ', error);
+
                 return null
             }
         }

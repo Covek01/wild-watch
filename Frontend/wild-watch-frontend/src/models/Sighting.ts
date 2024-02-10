@@ -29,17 +29,20 @@ export class SightingSummarySpecies{
     sightingTime:Date
     location:LocationI
     sighter:UserSummary
+    imageUrl:string
 
     constructor(
         id:string,
         sightingTime:Date,
         location:LocationI,
-        sighter:UserSummary
+        sighter:UserSummary,
+        imageUrl:string
     ){
         this.id=id;
         this.sightingTime=sightingTime;
         this.location=location;
         this.sighter=sighter;
+        this.imageUrl=imageUrl;
     }
 }
 
@@ -49,19 +52,22 @@ export class SightingSummaryHabitat{
     location:LocationI
     sighter:UserSummary
     species:SpeciesSummary
+    imageUrl:string
 
     constructor(
         id:string,
         sightingTime:Date,
         location:LocationI,
         sighter:UserSummary,
-        species:SpeciesSummary
+        species:SpeciesSummary,
+        imageUrl:string
     ){
         this.id=id;
         this.sightingTime=sightingTime;
         this.location=location;
         this.sighter=sighter;
-        this.species=species
+        this.species=species;
+        this.imageUrl=imageUrl;
     }
 }
 

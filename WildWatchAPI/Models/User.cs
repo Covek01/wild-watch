@@ -36,7 +36,7 @@ namespace WildWatchAPI.Models
         public GeoJson2DGeographicCoordinates? Location { get; set; }
         //[JsonIgnore]
         public List<SightingSummaryUser> Sightings { get; set; } = new();
-        //[JsonIgnore]
+        [JsonIgnore]
         public List<MongoDBRef> FavouriteSpecies { get; set; } = new();
     }
 

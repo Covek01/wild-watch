@@ -1,5 +1,5 @@
 import { api } from "./Service"
-import { Species } from "../models/Species"
+import { Species, SpeciesDto } from "../models/Species"
 import axios from "axios";
 
 class SpeciesService{
@@ -22,6 +22,29 @@ class SpeciesService{
 
                 //const errObject: Location = new Location(0, '')
                 return null;
+            }
+        }
+    }
+
+    public async GetByCommonNameFiltered(name: string){
+        try{
+            const {data, status} = await api.get<SpeciesDto[]>(`species/getByCommonNameFiltered/${name}`)
+
+            console.log(JSON.stringify(data, null, 4));
+            console.log('response status is: ', status);
+
+            return data
+        }
+        catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.log('error message while getting species info: ', error.message);
+                
+                return []
+            } else {
+                console.log('unexpected error while getting species info: ', error);
+
+                //const errObject: Location = new Location(0, '')
+                return []
             }
         }
     }
