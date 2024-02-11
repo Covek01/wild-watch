@@ -28,6 +28,7 @@ namespace WildWatchAPI.Services
         public Task<GeoJson2DGeographicCoordinates?> GetMyLocation();
         public Task SetUserName(string id, string userName);
         public Task<List<SightingSummaryUser>> GetMySightings();
+        public Task<List<Species>> GetMyFavouriteSpeciesWhole();
 
     }
 }

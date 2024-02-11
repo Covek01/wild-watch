@@ -598,7 +598,41 @@ namespace WildWatchAPI.Services
                 throw new Exception("User service failed");
             }
         }
+        public async Task<List<Species>> GetMyFavouriteSpeciesWhole()
+        {
+            try
+            {
+                var id = string.Empty;
+                if (_httpContextAccessor.HttpContext != null)
+                {
+                    id = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (string.IsNullOrEmpty(id))
+                    {
+                        throw new Exception("Token error");
+                    }
+                }
+                else
+                {
+                    throw new Exception("Token error");
+                }
 
+                var filter = Builders<User>.Filter.Where(u => u.Id == id);
+                var user = await _context.Users.Find(filter).FirstOrDefaultAsync();
+
+                List<Species> lista = new List<Species>();
+                foreach (var speciesId in user.FavouriteSpecies)
+                {
+                    var filterFavSpecies = Builders<Species>.Filter.Where(s => s.Id== (speciesId.Id).ToString());
+                    var s =await  _context.Species.Find(filterFavSpecies).FirstOrDefaultAsync();
+                    lista.Add(s);
+                }
+                return lista;
+            }
+            catch (Exception)
+            {
+                throw new Exception("User service failed");
+            }
+        }
         public async Task<List<string>> GetMyFavouriteSpeciesIds()
         {
             try

@@ -19,6 +19,7 @@ import NotAuthenticatedGuard from './routeGuards/NotAuthenticatedGuard';
 import Map from './components/mappage/map';
 import { MapStateProvider } from './contexts/map.context';
 import SpeciesList from './components/species-list/SpeciesList';
+import LandingPage from './components/landing/landingPage';
 
 function App() {
   return (
@@ -36,7 +37,7 @@ function App() {
                     <Route path="/speciesinfo/:id" element={<NotAuthenticatedGuard>{<SpeciesInfo />}</NotAuthenticatedGuard>}></Route>
                     <Route path="/species" element={<NotAuthenticatedGuard>{<SpeciesList />}</NotAuthenticatedGuard>}></Route>
                     <Route path="/map" element={<NotAuthenticatedGuard>{<Map />}</NotAuthenticatedGuard>}></Route>
-
+                    <Route path="/landing" element={<LandingPage />}></Route>
                     <Route
                       path="/signin"
                       element={<AuthenticatedGuard>{<SignIn />}</AuthenticatedGuard>}
