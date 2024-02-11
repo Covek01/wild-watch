@@ -25,7 +25,7 @@ const NameLabel:React.FC<props>  = ({name}) => {
                 </SvgIcon>
 
                 <Typography style={{ color: theme.palette.primary.contrastText, marginRight: '5%', marginLeft: '15%' }}
-                    variant="h5" component="div">
+                    variant="h3" component="div">
                     {name}
                 </Typography>
             </Stack>

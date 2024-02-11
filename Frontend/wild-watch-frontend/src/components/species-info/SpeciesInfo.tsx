@@ -53,7 +53,7 @@ const SpeciesInfo: React.FC = () => {
                         <ClassLabel name={species?.speciesClass?.toString() ?? ""} />
                         <Typography
                             style={{ color: theme.palette.primary.contrastText, marginRight: '5%', marginLeft: '15%' }}
-                            variant="body2" component="div">
+                            variant="h6" component="div">
                             {`Latin name : ${species?.scientificName}`}
                         </Typography>
                         <Typography
@@ -66,12 +66,7 @@ const SpeciesInfo: React.FC = () => {
                     </Stack>
                 </Paper>
             </ThemeProvider>
-            <Paper elevation={2}
-                    variant="elevation"
-                    sx={{width: '80%', marginLeft: 'auto', marginRight:'auto', marginTop: '1%'
-                     }}>
-                    <SightingsContainer sightings={species?.sightings ?? []}/>
-            </Paper>
+            
         </>
     )
 }

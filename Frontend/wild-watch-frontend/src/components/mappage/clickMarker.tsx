@@ -150,6 +150,7 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
             conservationStatusValue,
             'skrrrr'
         );
+        console.log(inputObject)
         const result = await SightingService.CreateSighting(inputObject)
     }
 

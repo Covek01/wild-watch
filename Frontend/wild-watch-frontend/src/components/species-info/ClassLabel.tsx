@@ -19,7 +19,7 @@ const ClassLabel:React.FC<props>  = ({name}) => {
         <>
             <Typography
                 style={{ color: theme.palette.primary.contrastText, marginRight: '5%', marginLeft: '15%' }}
-                variant="body2" component="div">
+                variant="h6" component="div">
                 {`Class name : ${name}`}
             </Typography>
         </>
