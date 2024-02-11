@@ -137,6 +137,8 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
 //   }
     const createSighting = async () => {
         const classNumber = KlasaInvert[klasaValue]
+        console.log(photoUrlValue)
+        console.log(imageUrlValue)
         const inputObject = new SightingDto(
             new Date(),
             new GeoJson2DGeographicCoordinates(position?.lat ?? 0, position?.lng ?? 0),
@@ -313,6 +315,7 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
                                 value={photoUrlValue}
                                 onChange={(event) => {
                                     setPhotoUrlValue(event.target.value ?? '')
+                                    console.log(photoUrlValue)
                                 }}
                             ></TextField>
                             <Button variant="contained" sx={{ p: 1.2 }} type="submit"  onClick={e => {
