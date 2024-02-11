@@ -26,6 +26,30 @@ class SpeciesService{
         }
     }
 
+    public async GetByCommonName(name: string){
+        try{
+            const {data, status} = await api.get<Species>(`species/getByCommonName/${name}`)
+
+            console.log(JSON.stringify(data, null, 4));
+            console.log('response status is: ', status);
+
+            return data
+        }
+        catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.log('error message while getting species info: ', error.message);
+                
+                return null;
+            } else {
+                console.log('unexpected error while getting species info: ', error);
+
+                //const errObject: Location = new Location(0, '')
+                return null;
+            }
+        }
+    }
+
+
     public async GetByCommonNameFiltered(name: string){
         try{
             const {data, status} = await api.get<SpeciesDto[]>(`species/getByCommonNameFiltered/${name}`)

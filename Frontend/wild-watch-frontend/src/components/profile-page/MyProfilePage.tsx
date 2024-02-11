@@ -18,7 +18,7 @@ import ForestIcon from '@mui/icons-material/Forest';
 const MyProfilePage:React.FC = () => {
     const { isAuthenticated, signout, user } = useAuthContext();
     const [userNameField, setUserNameField] = useState<string>("")
-
+    let dateTemp = new Date(user?.dateOfBirth ?? "")
     const setUserName = (name: string) => {
         setUserNameField(name)
     }
@@ -51,9 +51,7 @@ const MyProfilePage:React.FC = () => {
                         style={{ fontSize: '20px', color: theme.palette.primary.contrastText, marginRight: '5%', marginLeft: '15%' }}
                         variant="body2"
                         component="div">
-                        {/* {`Born: ${user?.dateOfBirth.getDate() ?? 0}
-                        .${user?.dateOfBirth.getMonth() ?? 0 + 1}
-                        .${user?.dateOfBirth.getFullYear()}`} */} Born: 2.2.2002.
+                        {`Born: ${dateTemp.getDate() ?? 0}.${dateTemp.getMonth() ?? 0 + 1}.${dateTemp.getFullYear()}.`} 
                         </Typography>
                     </Stack>
                     </Stack>
