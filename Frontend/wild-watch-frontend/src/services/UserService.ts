@@ -5,7 +5,7 @@ import { domainToASCII } from "url"
 import { stat } from "fs"
 import { UserRegister } from "../dtos/userRegister"
 import { SightingSummaryUser } from "../models/Sighting"
-import { FavouriteSpecies } from "../models/Species"
+import { FavouriteSpecies, Species } from "../models/Species"
 
 class UserService {
     public async Signin(email: string, password: string) {
@@ -38,7 +38,7 @@ class UserService {
 
     public async Signup(user: UserRegister) {
         try {
-            const { data, status } = await api.post<User>(`/user/register`,{...user,imageUrl:""});
+            const { data, status } = await api.post<User>(`/user/register`, { ...user, imageUrl: "" });
             return { data, status }
         }
         catch (error) {
@@ -52,9 +52,9 @@ class UserService {
         }
     }
 
-    public async GetUserInfo(id: string){
-        try{
-            const {data, status} = await api.get<User>(`user/read/${id}`)
+    public async GetUserInfo(id: string) {
+        try {
+            const { data, status } = await api.get<User>(`user/read/${id}`)
 
             console.log(JSON.stringify(data, null, 4));
             console.log('response status is: ', status);
@@ -64,7 +64,7 @@ class UserService {
         catch (error) {
             if (axios.isAxiosError(error)) {
                 console.log('error message while getting user info: ', error.message);
-                
+
                 return null
             } else {
                 console.log('unexpected error while getting user info: ', error);
@@ -73,9 +73,9 @@ class UserService {
         }
     }
 
-    public async UpdateUserName(id: string, username: string){
-        try{
-            const {data, status} = await api.put(`user/setUserName/${id}/${username}`)
+    public async UpdateUserName(id: string, username: string) {
+        try {
+            const { data, status } = await api.put(`user/setUserName/${id}/${username}`)
 
             console.log(JSON.stringify(data, null, 4));
             console.log('response status is: ', status);
@@ -85,7 +85,7 @@ class UserService {
         catch (error) {
             if (axios.isAxiosError(error)) {
                 console.log('error message while updating user name: ', error.message);
-                
+
                 return false
             } else {
                 console.log('unexpected error while updating user name: ', error);
@@ -95,9 +95,9 @@ class UserService {
     }
 
 
-    public async GetMySightings(){
-        try{
-            const {data, status} = await api.get<SightingSummaryUser[]>(`user/getMySightings/`)
+    public async GetMySightings() {
+        try {
+            const { data, status } = await api.get<SightingSummaryUser[]>(`user/getMySightings/`)
 
             console.log(JSON.stringify(data, null, 4));
             console.log('response status is: ', status);
@@ -107,7 +107,7 @@ class UserService {
         catch (error) {
             if (axios.isAxiosError(error)) {
                 console.log('error message while updating user name: ', error.message);
-                
+
                 return []
             } else {
                 console.log('unexpected error while updating user name: ', error);
@@ -117,9 +117,9 @@ class UserService {
         }
     }
 
-    public async GetMyFavouriteSpecies(){
-        try{
-            const {data, status} = await api.get<FavouriteSpecies[]>(`user/getMyFavouriteSpecies/`)
+    public async GetMyFavouriteSpecies() {
+        try {
+            const { data, status } = await api.get<FavouriteSpecies[]>(`user/getMyFavouriteSpecies/`)
 
             console.log(JSON.stringify(data, null, 4));
             console.log('response status is: ', status);
@@ -129,30 +129,7 @@ class UserService {
         catch (error) {
             if (axios.isAxiosError(error)) {
                 console.log('error message while updating user name: ', error.message);
-                
-                return []
-            } else {
-                console.log('unexpected error while updating user name: ', error);
 
-                return []
-            }
-        }
-    }
-    
-
-    public async GetMyFavouriteSpeciesIds(){
-        try{
-            const {data, status} = await api.get<string[]>(`user/getMyFavouriteSpeciesIds/`)
-
-            console.log(JSON.stringify(data, null, 4));
-            console.log('response status is: ', status);
-
-            return data
-        }
-        catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.log('error message while updating user name: ', error.message);
-                
                 return []
             } else {
                 console.log('unexpected error while updating user name: ', error);
@@ -163,9 +140,32 @@ class UserService {
     }
 
 
-    public async AddToMySpecies(id: string){
-        try{
-            const {data, status} = await api.put<string[]>(`user/addFavouriteSpecies2/${id}`)
+    public async GetMyFavouriteSpeciesIds() {
+        try {
+            const { data, status } = await api.get<string[]>(`user/getMyFavouriteSpeciesIds/`)
+
+            console.log(JSON.stringify(data, null, 4));
+            console.log('response status is: ', status);
+
+            return data
+        }
+        catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.log('error message while updating user name: ', error.message);
+
+                return []
+            } else {
+                console.log('unexpected error while updating user name: ', error);
+
+                return []
+            }
+        }
+    }
+
+
+    public async AddToMySpecies(id: string) {
+        try {
+            const { data, status } = await api.put<string[]>(`user/addFavouriteSpecies2/${id}`)
 
             console.log(JSON.stringify(data, null, 4));
             console.log('response status is: ', status);
@@ -175,7 +175,7 @@ class UserService {
         catch (error) {
             if (axios.isAxiosError(error)) {
                 console.log('error message while updating favourite species: ', error.message);
-                
+
                 return null
             } else {
                 console.log('unexpected error while updating user favourite species: ', error);
@@ -185,9 +185,9 @@ class UserService {
         }
     }
 
-    public async RemoveFromSpecies(id: string){
-        try{
-            const {data, status} = await api.put<string[]>(`user/removeFavouriteSpecies2/${id}`)
+    public async RemoveFromSpecies(id: string) {
+        try {
+            const { data, status } = await api.put<string[]>(`user/removeFavouriteSpecies2/${id}`)
 
 
             console.log(JSON.stringify(data, null, 4));
@@ -198,10 +198,37 @@ class UserService {
         catch (error) {
             if (axios.isAxiosError(error)) {
                 console.log('error message while updating user favourite species: ', error.message);
-                
+
                 return null
             } else {
                 console.log('unexpected error while updating favourite species: ', error);
+
+                return null
+            }
+        }
+    }
+
+    public async GetFavouriteSpeciesWhole() {
+        try {
+            const { data, status } = await api.get(`/user/getWholeFavouriteSpecies`)
+            const species = []
+            for (var d of data) {
+                const sigs=[]
+                for(var sig of d.sightings){
+                    const temp={...sig, location:{coordinates:{ latitude:sig.location.latitude, longitude:sig.location.longitude, values:[sig.location.latitude,sig.location.longitude]}}}
+                    sigs.push(temp)
+                }
+                species.push(new Species(d.id, d.speciesClass, d.commonName, d.scientificName, d.imageUrl, d.description, d.conservationStatus, sigs, d.habitats))
+            }
+            return species;
+        }
+        catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.log('error message while getting favourite species: ', error.message);
+
+                return null
+            } else {
+                console.log('unexpected error while getting favourite species: ', error);
 
                 return null
             }

@@ -302,5 +302,20 @@ namespace WildWatchAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [Authorize]
+        [HttpGet("getWholeFavouriteSpecies")]
+        public async Task<ActionResult> GetMyFavouriteSpeciesWhole()
+        {
+            try
+            {
+                var result = await _userService.GetMyFavouriteSpeciesWhole();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
