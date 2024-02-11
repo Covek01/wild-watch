@@ -122,3 +122,21 @@ export enum Klasa {
     Birds, //ptice
     Mammals// sisari
 }
+
+export const KlasaInvert: { [key: string]: Klasa } = {
+    "Sponge": Klasa.Sponge,
+    "Cnidaria": Klasa.Cnidaria,
+    "Platyhelminthes": Klasa.Platyhelminthes,
+    "Annelida": Klasa.Annelida,
+    "Mollusca": Klasa.Mollusca,
+    "Cephalopoda": Klasa.Cephalopoda,
+    "Arthropoda": Klasa.Arthropoda,
+    "Echinodermata": Klasa.Echinodermata,
+    "Tunicata": Klasa.Tunicata,
+    "Cephalochordata": Klasa.Cephalochordata,
+    "Fish": Klasa.Fish,
+    "Amphibians": Klasa.Amphibians,
+    "Reptilia": Klasa.Reptilia,
+    "Birds": Klasa.Birds,
+    "Mammals": Klasa.Mammals
+};

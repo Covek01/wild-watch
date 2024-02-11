@@ -6,31 +6,40 @@ import { Marker, Popup, useMapEvents } from "react-leaflet"
 import UserService from "../../services/UserService";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "../../contexts/snackbar.context";
-import { Klasa, SpeciesDto } from "../../models/Species";
+import { Klasa, KlasaInvert, SpeciesDto } from "../../models/Species";
 import SpeciesService from "../../services/SpeciesService";
 import { getValue } from "@testing-library/user-event/dist/utils";
+import { useAuthContext } from "../../contexts/auth.context";
+import { GeoJson2DGeographicCoordinates, SightingDto } from "../../models/Sighting";
+import SightingService from "../../services/SightingService";
 
 interface FormInputs{
     imageUrl: string,
+    photoUrl: string,
     speciesClass: string,
     commonName: string,
     scientificName: string,
     description: string,
     conservationStatus: string,
-    comment: string
 }
 
 interface ClickMarkerProps {
     setClickMarkerCoordsState: React.Dispatch<React.SetStateAction<{ lat: number, lng: number } | null>>
 }
 export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerProps) {
-
+    const { isAuthenticated, signout, user } = useAuthContext();
     const [speciesList, setSpeciesList] = useState<string[]>([])
     const [nameValue, setNameValue] = useState<string>('')
     const [inputValue, setInputValue] = useState<string>('')
     const [speciesFound, setSpeciesFound] = useState<boolean>(false)
     const [klasaValue, setKlasaValue] = useState<string>('')
     const [klasaInputValue, setKlasaInputValue] = useState<string>('')
+
+    const [scientificNameValue, setScientificNameValue] = useState<string>('')
+    const [descriptiontValue, setDescriptionValue] = useState<string>('')
+    const [conservationStatusValue, setConservationStatusValue] = useState<string>('')
+    const [imageUrlValue, setImageUrlValue] = useState<string>('')
+    const [photoUrlValue, setPhotoUrlValue] = useState<string>('')
 
     function KlasaValues(){
         return Object
@@ -90,14 +99,58 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
         setSpeciesList((await SpeciesService.GetByCommonNameFiltered(newInputValue)).map(x => x.commonName))
     }
 
+    // const setValuesOfFields = async (newValue: string) => {
+    //     const data = await SpeciesService.GetByCommonName(newValue)
+    //     setValue("imageUrl", data?.imageUrl ?? '')
+    //     const klasa = Klasa[data?.speciesClass ?? 0] ?? ''
+    //     setValue("speciesClass", klasa)
+    //     setValue("scientificName", data?.scientificName ?? '')
+    //     setValue("description", data?.description ?? '')
+    //     setValue("conservationStatus", data?.conservationStatus ?? '')
+    // }
     const setValuesOfFields = async (newValue: string) => {
         const data = await SpeciesService.GetByCommonName(newValue)
-        setValue("imageUrl", data?.imageUrl ?? '')
-        const klasa = Klasa[data?.speciesClass ?? 0] ?? ''
-        setValue("speciesClass", klasa)
-        setValue("scientificName", data?.scientificName ?? '')
-        setValue("description", data?.description ?? '')
-        setValue("conservationStatus", data?.conservationStatus ?? '')
+        console.log((data?.speciesClass ?? '').toString())
+        setImageUrlValue(data?.imageUrl ?? '')
+        const klasaValue: string | Klasa = data?.speciesClass ?? 'Sponge'
+        setKlasaValue(klasaValue.toString());
+        setScientificNameValue(data?.scientificName ?? '')
+        setDescriptionValue(data?.description ?? '')
+        setConservationStatusValue(data?.conservationStatus ?? '')
+    }
+
+    // {
+//     "sightingTime": "2024-02-11T21:35:48.327Z",
+//     "location": {
+//       "longitude": 0,
+//       "latitude": 0
+//     },
+//     "photoUrl": "string",
+//     "sighterId": "string",
+//     "speciesClass": 0,
+//     "commonName": "string",
+//     "scientificName": "string",
+//     "imageUrl": "string",
+//     "description": "string",
+//     "conservationStatus": "string",
+//     "comment": "string"
+//   }
+    const createSighting = async () => {
+        const classNumber = KlasaInvert[klasaValue]
+        const inputObject = new SightingDto(
+            new Date(),
+            new GeoJson2DGeographicCoordinates(position?.lat ?? 0, position?.lng ?? 0),
+            imageUrlValue,
+            user?.id ?? '',
+            classNumber,
+            nameValue,
+            scientificNameValue,
+            imageUrlValue,
+            descriptiontValue,
+            conservationStatusValue,
+            'skrrrr'
+        );
+        const result = await SightingService.CreateSighting(inputObject)
     }
 
     return position === null ? null : (
@@ -177,6 +230,10 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
                                 error={Boolean(errors.scientificName)}
                                 InputLabelProps={{ shrink: true}}
                                 disabled={speciesFound}
+                                value={scientificNameValue}
+                                onChange={(event) => {
+                                    setScientificNameValue(event.target.value ?? '')
+                                }}
                             ></TextField>
                             <Autocomplete
                                 sx={{
@@ -208,6 +265,10 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
                                 error={Boolean(errors.description)}
                                 InputLabelProps={{ shrink: true}} 
                                 disabled={speciesFound}
+                                value={descriptiontValue}
+                                onChange={(event) => {
+                                    setDescriptionValue(event.target.value ?? '')
+                                }}
                             ></TextField>
                             <TextField
                                 sx={{
@@ -219,19 +280,43 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
                                 error={Boolean(errors.conservationStatus)}
                                 InputLabelProps={{ shrink: true}}
                                 disabled={speciesFound}
+                                value={conservationStatusValue}
+                                onChange={(event) => {
+                                    setConservationStatusValue(event.target.value ?? '')
+                                }}
                             ></TextField>
                             <TextField
                                 sx={{
                                     height: 55
                                 }}
-                                label="Photo url"
+                                label="Image url"
                                 className="form-field"
                                 {...register("imageUrl", { required: true })}
                                 error={Boolean(errors.imageUrl)}
                                 InputLabelProps={{ shrink: true}}
                                 disabled={speciesFound}
+                                value={imageUrlValue}
+                                onChange={(event) => {
+                                    setImageUrlValue(event.target.value ?? '')
+                                }}
                             ></TextField>
-                            <Button variant="contained" sx={{ p: 1.2 }} type="submit">
+                             <TextField
+                                sx={{
+                                    height: 55
+                                }}
+                                label="Photo url"
+                                className="form-field"
+                                {...register("photoUrl", { required: true })}
+                                error={Boolean(errors.imageUrl)}
+                                InputLabelProps={{ shrink: true}}
+                                value={photoUrlValue}
+                                onChange={(event) => {
+                                    setPhotoUrlValue(event.target.value ?? '')
+                                }}
+                            ></TextField>
+                            <Button variant="contained" sx={{ p: 1.2 }} type="submit"  onClick={e => {
+                                    createSighting()
+                            }}>
                                 Add
                             </Button>
                         </Stack>

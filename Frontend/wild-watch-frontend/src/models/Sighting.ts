@@ -94,3 +94,74 @@ export class Sighting{
         this.imageUrl=imageUrl;
     }
 }
+
+// public class SightingDto
+// {
+//     public DateTime SightingTime { get; set; }
+//     public GeoJson2DGeographicCoordinates Location { get; set; } = null!;
+//     public string? PhotoUrl { get; set; }
+
+//     public string SighterId { get; set; } = null!;
+
+//     public Klasa SpeciesClass { get; set; }
+//     public string CommonName { get; set; } = null!;
+
+//     public string ScientificName { get; set; } = null!;
+
+//     public string? ImageUrl { get; set; }
+//     public string Description { get; set; } = null!;
+
+//     public string ConservationStatus { get; set; }= null!;
+
+//     public string? Comment { get; set; }
+
+// }
+export class GeoJson2DGeographicCoordinates{
+    longitude: number
+    latitude: number
+
+    constructor(lat: number, long: number){
+        this.longitude = long
+        this.latitude = lat
+    }
+}
+
+export class SightingDto {
+    sightingTime: Date
+    location: GeoJson2DGeographicCoordinates
+    photoUrl: string
+    sighterId: string
+    speciesClass: number
+    commonName: string
+    scientificName: string
+    imageUrl: string
+    description: string
+    conservationStatus: string
+    comment: string
+
+    constructor(
+        sightingTime: Date,
+        location: GeoJson2DGeographicCoordinates,
+        photoUrl: string,
+        sighterId: string,
+        speciesClass: number,
+        commonName: string,
+        scientificName: string,
+        imageUrl: string,
+        description: string,
+        conservationStatus: string,
+        comment: string
+    ) {
+        this.sightingTime = sightingTime;
+        this.location = location;
+        this.photoUrl = photoUrl;
+        this.sighterId = sighterId;
+        this.speciesClass = speciesClass;
+        this.commonName = commonName;
+        this.scientificName = scientificName;
+        this.imageUrl = imageUrl;
+        this.description = description;
+        this.conservationStatus = conservationStatus;
+        this.comment = comment;
+    }
+}
