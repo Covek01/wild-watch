@@ -32,7 +32,7 @@ namespace WildWatchAPI.Services
                 {
                     var newSpecies = new SpeciesDto()
                     {
-                        Class = s.SpeciesClass,
+                        SpeciesClass = s.SpeciesClass,
                         CommonName = s.CommonName,
                         ScientificName = s.ScientificName,
                         ImageUrl = s.ImageUrl ?? "",
@@ -53,7 +53,7 @@ namespace WildWatchAPI.Services
 
                 var speciesSummary = new SpeciesSummary()
                 {
-                    Class = species.Class,
+                    SpeciesClass = species.SpeciesClass,
                     CommonName = s.CommonName,
                     ScientificName = s.ScientificName,
                     ImageUrl = species.ImageUrl??"",
@@ -211,7 +211,7 @@ namespace WildWatchAPI.Services
                 {
                     var newSpecies = new SpeciesDto()
                     {
-                        Class = s.SpeciesClass,
+                        SpeciesClass = s.SpeciesClass,
                         CommonName = s.CommonName,
                         ScientificName = s.ScientificName,
                         ImageUrl = s.PhotoUrl ?? "",
@@ -225,7 +225,7 @@ namespace WildWatchAPI.Services
 
                 var speciesSummary = new SpeciesSummary()
                 {
-                    Class = species.Class,
+                    SpeciesClass = species.SpeciesClass,
                     CommonName = s.CommonName,
                     ScientificName = s.ScientificName,
                     ImageUrl = species.ImageUrl ?? "",

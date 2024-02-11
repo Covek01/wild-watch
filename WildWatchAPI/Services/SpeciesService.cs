@@ -25,7 +25,7 @@ namespace WildWatchAPI.Services
         {
             Species species = new Species()
             {
-                Class = s.Class,
+                SpeciesClass = s.SpeciesClass,
                 CommonName = s.CommonName,
                 Description = s.Description,
                 ConservationStatus = s.ConsertvationStatus,
@@ -89,7 +89,7 @@ namespace WildWatchAPI.Services
                 session.StartTransaction();
                 var speciesFilter = Builders<Species>.Filter.Where(sp => sp.Id == speciesId);
                 var speciesUpdate = Builders<Species>.Update
-                    .Set(sp => sp.Class, s.Class)
+                    .Set(sp => sp.SpeciesClass, s.SpeciesClass)
                     .Set(sp => sp.CommonName, s.CommonName)
                     .Set(sp => sp.ScientificName, s.ScientificName)
                     .Set(sp => sp.ImageUrl, s.ImageUrl)
@@ -99,7 +99,7 @@ namespace WildWatchAPI.Services
 
                 var speciesSummary = new SpeciesSummary()
                 {
-                    Class = s.Class,
+                    SpeciesClass = s.SpeciesClass,
                     CommonName = s.CommonName,
                     ConservationStatus = s.ConsertvationStatus,
                     Description = s.Description,

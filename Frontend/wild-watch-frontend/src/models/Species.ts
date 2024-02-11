@@ -3,7 +3,7 @@ import { SightingSummarySpecies } from "./Sighting"
 
 export class SpeciesSummary {
     speciesId: string
-    classAnimal: Klasa
+    speciesClass: Klasa
     commonName: string
     scientificName: string
     imageUrl: string
@@ -20,7 +20,7 @@ export class SpeciesSummary {
         conservationStatus: string
     ) {
         this.speciesId = id;
-        this.classAnimal = classAnimal;
+        this.speciesClass = classAnimal;
         this.commonName = commonName;
         this.scientificName = scientificName;
         this.imageUrl = imageUrl;
@@ -33,7 +33,7 @@ export class SpeciesSummary {
 
 export class SpeciesDto {
     id: string
-    classAnimal: Klasa
+    speciesClass: Klasa
     commonName: string
     scientificName: string
     imageUrl: string
@@ -42,7 +42,7 @@ export class SpeciesDto {
 
     constructor(
         id: string,
-        classAnimal: Klasa,
+        speciesClass: Klasa,
         commonName: string,
         scientificName: string,
         imageUrl: string,
@@ -50,7 +50,7 @@ export class SpeciesDto {
         conservationStatus: string
     ) {
         this.id = id;
-        this.classAnimal = classAnimal;
+        this.speciesClass = speciesClass;
         this.commonName = commonName;
         this.scientificName = scientificName;
         this.imageUrl = imageUrl;
@@ -63,7 +63,7 @@ export class SpeciesDto {
 
 export class Species {
     id: string
-    classAnimal: Klasa
+    speciesClass: Klasa
     commonName: string
     scientificName: string
     imageUrl: string
@@ -74,7 +74,7 @@ export class Species {
 
     constructor(
         id: string,
-        classAnimal: Klasa,
+        speciesClass: Klasa,
         commonName: string,
         scientificName: string,
         imageUrl: string,
@@ -84,7 +84,7 @@ export class Species {
         habitats: HabitatSummary[]
     ) {
         this.id = id;
-        this.classAnimal = classAnimal;
+        this.speciesClass = speciesClass;
         this.commonName = commonName;
         this.scientificName = scientificName;
         this.imageUrl = imageUrl;

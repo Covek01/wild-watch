@@ -4,7 +4,7 @@ namespace WildWatchAPI.DTOs
 {
     public class SpeciesDto
     {
-        public Klasa Class { get; set; }
+        public Klasa SpeciesClass { get; set; }
         public string CommonName { get; set; } = null!;
         public string ScientificName { get; set; } = null!;
         public string ImageUrl { get; set; } = null!;

@@ -12,7 +12,7 @@ namespace WildWatchAPI.DTOs
         public string? Id { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
         [BsonRepresentation(BsonType.String)]
-        public Klasa Class { get; set; }
+        public Klasa SpeciesClass { get; set; }
         public string CommonName { get; set; } = null!;
         public string ScientificName { get; set; } = null!;
         public string ImageUrl { get; set; } = null!;

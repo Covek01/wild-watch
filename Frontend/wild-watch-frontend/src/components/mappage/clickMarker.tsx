@@ -10,6 +10,16 @@ import { Klasa, SpeciesDto } from "../../models/Species";
 import SpeciesService from "../../services/SpeciesService";
 import { getValue } from "@testing-library/user-event/dist/utils";
 
+interface FormInputs{
+    imageUrl: string,
+    speciesClass: string,
+    commonName: string,
+    scientificName: string,
+    description: string,
+    conservationStatus: string,
+    comment: string
+}
+
 interface ClickMarkerProps {
     setClickMarkerCoordsState: React.Dispatch<React.SetStateAction<{ lat: number, lng: number } | null>>
 }
@@ -53,17 +63,11 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
         setValue,
         handleSubmit,
         formState: { errors },
-    } = useForm<{ photoUrl: string,
-                speciesClass: string,
-                commonName: string,
-                scientificName: string,
-                description: string,
-                conservationStatus: string,
-                comment: string}>({
+    } = useForm<FormInputs>({
         reValidateMode: "onSubmit",
     });
 
-    const onSubmit = handleSubmit(async (creds) => {
+    const onSubmit = async (creds: FormInputs) => {
         // const { data, status } = await UserService.Signin(creds.email, creds.password);
 
         // if (status === 200) {
@@ -76,8 +80,9 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
         // }
 
         //add sighting treba da se doda u servis 
-        const a = 1;
-    });
+        const a = creds;
+        console.log("JAVLJAM SE IZ HENDLERA")
+    };
 
     const updateSpeciesList = async (newInputValue: string) => {
         setInputValue(newInputValue)
@@ -87,8 +92,8 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
 
     const setValuesOfFields = async (newValue: string) => {
         const data = await SpeciesService.GetByCommonName(newValue)
-        setValue("photoUrl", data?.imageUrl ?? '')
-        const klasa = Klasa[data?.classAnimal ?? 0] ?? ''
+        setValue("imageUrl", data?.imageUrl ?? '')
+        const klasa = Klasa[data?.speciesClass ?? 0] ?? ''
         setValue("speciesClass", klasa)
         setValue("scientificName", data?.scientificName ?? '')
         setValue("description", data?.description ?? '')
@@ -117,7 +122,7 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
                     >
                         <Stack
                             component="form"
-                            onSubmit={onSubmit}
+                            onSubmit={handleSubmit(onSubmit)}
                             sx={{
                                 display: "flex",
                                 gap: "0.8em",
@@ -221,8 +226,8 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
                                 }}
                                 label="Photo url"
                                 className="form-field"
-                                {...register("photoUrl", { required: true })}
-                                error={Boolean(errors.photoUrl)}
+                                {...register("imageUrl", { required: true })}
+                                error={Boolean(errors.imageUrl)}
                                 InputLabelProps={{ shrink: true}}
                                 disabled={speciesFound}
                             ></TextField>

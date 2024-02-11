@@ -50,7 +50,7 @@ const SpeciesInfo: React.FC = () => {
                     <Stack direction="column" spacing={2}
                         style={{width: '60%', alignSelf: 'center'}}>
                         <NameLabel name={species?.commonName ?? ""} />
-                        <ClassLabel name={species?.classAnimal?.toString() ?? ""} />
+                        <ClassLabel name={species?.speciesClass?.toString() ?? ""} />
                         <Typography
                             style={{ color: theme.palette.primary.contrastText, marginRight: '5%', marginLeft: '15%' }}
                             variant="body2" component="div">
