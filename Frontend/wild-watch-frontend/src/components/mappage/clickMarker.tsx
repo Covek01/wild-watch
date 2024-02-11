@@ -140,7 +140,7 @@ export default function ClickMarker({ setClickMarkerCoordsState }: ClickMarkerPr
         const inputObject = new SightingDto(
             new Date(),
             new GeoJson2DGeographicCoordinates(position?.lat ?? 0, position?.lng ?? 0),
-            imageUrlValue,
+            photoUrlValue,
             user?.id ?? '',
             classNumber,
             nameValue,
