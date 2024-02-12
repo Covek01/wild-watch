@@ -359,7 +359,7 @@ namespace WildWatchAPI.Services
             try
             {
                 var sightingsFilter = Builders<Sighting>.Filter.Where(s => s.Sighter.userId == sighterId);
-                var sightings = await _context.Sightings.Find(sightingsFilter).ToListAsync();
+                var sightings = await _context.Sightings.Find(sightingsFilter).Limit(30).ToListAsync();
 
                 return sightings;
             }

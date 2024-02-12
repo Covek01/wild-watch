@@ -32,7 +32,7 @@ const SightingsContainer:React.FC = () => {
             <Paper>
                 <Box width="90%" margin="0 auto 0 auto">
                     <Stack direction="row" flexWrap="wrap" justifyContent="flex-start" spacing={0}>
-                        {sightings?.map( (x, index) => (
+                        {sightings?.reverse().map( (x, index) => (
                             <SightingCard key={index} sighting={x} height='90%' marginCards='8px'/>
                         ))}
                     </Stack>

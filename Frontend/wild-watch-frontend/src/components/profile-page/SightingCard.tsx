@@ -21,6 +21,8 @@ const SightingCard:React.FC<props> = ({sighting, height, marginCards}) => {
         navigate(`/speciesinfo/${sighting.species.speciesId}`)
     }
 
+    const dateTemp = new Date(sighting.sightingTime)
+
     return (
         <>
             <Card sx={{width: '32%', height: {height}, margin: `${marginCards} ${marginCards} ${marginCards} 0`}}>
@@ -44,7 +46,7 @@ const SightingCard:React.FC<props> = ({sighting, height, marginCards}) => {
                         {sighting.species.conservationStatus}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                        {'September 14, 2016'}
+                        {`Seen ${dateTemp.getDate() ?? 0}.${dateTemp.getMonth() ?? 0 + 1}.${dateTemp.getFullYear()}.`}
                     </Typography>
 
                 </CardContent>
